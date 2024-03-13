@@ -1,18 +1,37 @@
-# main.py
-import argparse
-from calibration.camera_calibration import calibrate_camera
-from detection.wall_detection import detect_walls
+from livestream import livestream
+from pathfinding import grid_management
+from calibration import camera_calibration
+import cv2
 
 def main():
-    parser = argparse.ArgumentParser(description='Robot control system.')
-    parser.add_argument('command', choices=['calibrate'], help='The command to execute.')
+    # Create a LiveStream object
+    stream = livestream.LiveStream()
 
-    args = parser.parse_args()
+    # Calibrate the camera
+    ret, mtx, dist, rvecs, tvecs = calibrate_camera()
 
-    if args.command == 'calibrate':
-        success = calibrate_camera()
-        if success:
-            detect_walls()
+    if not ret:
+        print("Camera calibration failed")
+        return
+
+    while True:
+        # Get a frame
+        frame = stream.get_frame()
+
+        # Undistort the frame
+        frame = cv2.undistort(frame, mtx, dist, None, mtx)
+
+        # Draw a grid on the frame
+        frame = grid_management.draw_grid(frame, 8)
+
+        # Show the frame
+        if not stream.show_frame(frame):
+            break
+
+    # Release the stream
+    stream.release()
+
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
-# camera_calibration.py
 import numpy as np
 import cv2
+import time
 
 def calibrate_camera():
     # termination criteria
@@ -16,7 +16,8 @@ def calibrate_camera():
 
     cap = cv2.VideoCapture(0)
 
-    while True:
+    start_time = time.time()
+    while time.time() - start_time < 30:  # calibrate for 30 seconds
         ret, frame = cap.read()
         if not ret:
             break
@@ -24,7 +25,7 @@ def calibrate_camera():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Find the chess board corners
-        ret, corners = cv2.findChessboardCorners(gray, (7,6), None)
+        ret, corners = cv2.findChessboardCorners(gray, (9,6), None)
 
         # If found, add object points, image points (after refining them)
         if ret == True:
@@ -34,7 +35,7 @@ def calibrate_camera():
             imgpoints.append(corners2)
 
             # Draw and display the corners
-            img = cv2.drawChessboardCorners(frame, (7,6), corners2, ret)
+            img = cv2.drawChessboardCorners(frame, (9,6), corners2, ret)
             cv2.imshow('img', img)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
