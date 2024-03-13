@@ -1,8 +1,9 @@
 import numpy as np
 import cv2
 import time
+from livestream import livestream  # Corrected import statement
 
-def calibrate_camera():
+def calibrate_camera(stream):
     # termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -14,12 +15,12 @@ def calibrate_camera():
     objpoints = [] # 3d point in real world space
     imgpoints = [] # 2d points in image plane.
 
-    cap = cv2.VideoCapture(0)
+    cap = stream
 
     start_time = time.time()
     while time.time() - start_time < 30:  # calibrate for 30 seconds
-        ret, frame = cap.read()
-        if not ret:
+        frame = cap.get_frame()  # use get_frame instead of read
+        if frame is None:  # check if the frame is None instead of using ret
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -41,8 +42,8 @@ def calibrate_camera():
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    cv2.destroyAllWindows()
-    cap.release()
+    #cv2.destroyAllWindows()
+    #cap.release()
 
     if len(objpoints) > 0 and len(imgpoints) > 0:
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
