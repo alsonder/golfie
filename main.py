@@ -25,13 +25,13 @@ def main():
             print("Failed to get frame")
             break
 
-        # Show the frame
-        #cv2.imshow('Live Stream', frame)
+        #Show the frame
+        cv2.imshow('Live Stream', frame)
 
-        # Check if the window is open
-        #if cv2.getWindowProperty('Live Stream', 0) < 0:
-        #    print("Window closed")
-        #    break
+         #Check if the window is open
+        if cv2.getWindowProperty('Live Stream', 0) < 0:
+            print("Window closed")
+            break
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # Break the loop when 'q' is pressed
             break
