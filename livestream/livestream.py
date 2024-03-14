@@ -1,7 +1,7 @@
 import cv2
 
 class LiveStream:
-    def __init__(self, camera_id=2):  # Change this line
+    def __init__(self, camera_id=0):  # Change this line
         self.cap = cv2.VideoCapture(camera_id)
 
     def get_frame(self):
