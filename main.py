@@ -1,6 +1,7 @@
 import cv2
 from livestream import livestream
-from calibration import camera_calibration  # Import the calibration function
+from calibration import camera_calibration # Import the calibration function
+from detection import aruco_detection  # Import the ArUco detection function
 
 def main():
     # Create a LiveStream object
@@ -25,10 +26,13 @@ def main():
             print("Failed to get frame")
             break
 
-        #Show the frame
+        # Detect ArUco markers in the frame
+        frame = aruco_detection.detect_aruco(frame, (ret, mtx, dist, rvecs, tvecs))
+
+        # Show the frame
         cv2.imshow('Live Stream', frame)
 
-         #Check if the window is open
+        # Check if the window is open
         if cv2.getWindowProperty('Live Stream', 0) < 0:
             print("Window closed")
             break

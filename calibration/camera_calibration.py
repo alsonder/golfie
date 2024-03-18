@@ -60,17 +60,17 @@ def calibrate_camera(stream):
     if len(threedpoints) > 0 and len(twodpoints) > 0:
         ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(threedpoints, twodpoints, gray.shape[::-1], None, None)
         
-        print("Camera matrix:")
-        print(mtx)
+        #print("Camera matrix:")
+        #print(mtx)
 
-        print("\nDistortion coefficient:")
-        print(dist)
+        #print("\nDistortion coefficient:")
+        #print(dist)
 
-        print("\nRotation Vectors:")
-        print(rvecs)
+        #print("\nRotation Vectors:")
+        #print(rvecs)
 
-        print("\nTranslation Vectors:")
-        print(tvecs)
+        #print("\nTranslation Vectors:")
+        #print(tvecs)
 
         #return the calibration parameters
         return ret, mtx, dist, rvecs, tvecs
