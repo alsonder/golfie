@@ -3,6 +3,8 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
+# Inspired by https://docs.opencv.org/4.9.0/d5/dae/tutorial_aruco_detection.html
+
 def detect_aruco(stream, mtx, dist, markerLength):
     # Create an ArUco dictionary and detector
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
