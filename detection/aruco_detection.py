@@ -1,31 +1,19 @@
-import cv2
-import cv2.aruco as aruco
+import cv2 as cv
 
-def detect_aruco(stream, calibration_params):
-    # Create an ArUco dictionary
-    aruco_dict = aruco.Dictionary_get(aruco.DICT_6X6_250)
-    parameters = aruco.DetectorParameters_create()
+def detect_aruco(frame, calibration_params):
+    # Create an ArUco dictionary and detector
+    dictionary = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_6X6_250)
+    parameters = cv.aruco.DetectorParameters()
+    detector = cv.aruco.ArucoDetector(dictionary, parameters)
 
     # Get the calibration parameters
     ret, mtx, dist, rvecs, tvecs = calibration_params
 
-    while True:
-        # Grab a frame
-        frame = stream.get_frame()
-        if frame is None:
-            break
+    # Detect the markers in the image
+    markerCorners, markerIds, rejectedCandidates = detector.detectMarkers(frame)
 
-        # Detect the markers in the image
-        corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, aruco_dict, parameters=parameters, cameraMatrix=mtx, distCoeff=dist)
-
-        if ids is not None:
-            # Draw the detected markers on the image
-            frame = aruco.drawDetectedMarkers(frame, corners, ids)
-
-        cv2.imshow('frame', frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    if markerIds is not None:
+        # Draw the detected markers on the image
+        frame = cv.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
 
     return frame
-
