@@ -9,6 +9,7 @@ def main():
 
     # Calibrate the camera
     ret, mtx, dist, rvecs, tvecs = camera_calibration.calibrate_camera(stream)
+    
     if not ret:
         print("Camera calibration failed")
         return
@@ -27,9 +28,7 @@ def main():
             break
 
         # Detect ArUco markers in the frame
-        frame = aruco_detection.detect_aruco(frame, (ret, mtx, dist, rvecs, tvecs))
-
-        # Show the frame
+        frame = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.05)        # Show the frame
         cv2.imshow('Live Stream', frame)
 
         # Check if the window is open

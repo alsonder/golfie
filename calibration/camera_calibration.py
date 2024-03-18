@@ -64,7 +64,7 @@ def calibrate_camera(stream):
         #print(mtx)
 
         #print("\nDistortion coefficient:")
-        #print(dist)
+        print(dist)
 
         #print("\nRotation Vectors:")
         #print(rvecs)
