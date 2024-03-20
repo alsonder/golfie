@@ -7,7 +7,7 @@ import numpy as np
 
 def detect_aruco(stream, mtx, dist, markerLength):
     # Create an ArUco dictionary and detector
-    dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
+    dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
     parameters = aruco.DetectorParameters()
     detector = aruco.ArucoDetector(dictionary, parameters)
 
