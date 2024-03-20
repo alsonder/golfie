@@ -46,12 +46,12 @@ def capture_images(interval=5, output_dir='images'):
 
             # Save frame as image when countdown reaches 0
             if countdown == 0:
-                img_name = os.path.join(output_dir, f'image_{count//interval}.png')
+                img_name = os.path.join(output_dir, f'image_{int((count + 1) / interval)}.png')
                 cv2.imwrite(img_name, frame)
                 print(f'Saved image: {img_name}')
 
                 # Print the current iteration count
-                print(f'Iteration: {int((count + 1) / 5)}')
+                print(f'Iteration: {int((count + 1) / interval)}')
 
             count += 1
 
