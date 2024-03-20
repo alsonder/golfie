@@ -1,5 +1,5 @@
 
-# this file is only for generating imagsdes for training the model to detect balls
+# this file is only for generating images for training the model to detect balls
 
 import cv2
 import time
