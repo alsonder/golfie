@@ -1,8 +1,10 @@
 import cv2
 import time
 import os
+from gtts import gTTS
+from pygame import mixer
 
-def capture_images(interval=4, output_dir='images'):
+def capture_images(interval=5, output_dir='images'):
     # Create the output directory if it doesn't exist
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -14,6 +16,9 @@ def capture_images(interval=4, output_dir='images'):
     if not cap.isOpened():
         print("Cannot open camera")
         return
+
+    # Initialize the mixer for playing audio
+    mixer.init()
 
     try:
         count = 0
@@ -27,16 +32,26 @@ def capture_images(interval=4, output_dir='images'):
                 break
 
             # Draw countdown on the frame
-            cv2.putText(frame, str(interval - (count % interval)), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            countdown = interval - 1 - (count % interval)
+            cv2.putText(frame, str(countdown), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+            # Generate voice for the countdown
+            tts = gTTS(text=str(countdown), lang='en')
+            tts.save("countdown.mp3")
+            mixer.music.load("countdown.mp3")
+            mixer.music.play()
 
             # Display the resulting frame
             cv2.imshow('frame', frame)
 
-            # Save frame as image every 'interval' seconds
-            if count % interval == 0:
+            # Save frame as image when countdown reaches 0
+            if countdown == 0:
                 img_name = os.path.join(output_dir, f'image_{count//interval}.png')
                 cv2.imwrite(img_name, frame)
                 print(f'Saved image: {img_name}')
+
+                # Print the current iteration count
+                print(f'Iteration: {int((count + 1) / 5)}')
 
             count += 1
 
