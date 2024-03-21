@@ -27,15 +27,27 @@ def detect_balls(image_path):
     large_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
 
     # Calculate the center of each contour and store in an array
-    centers = []
+    centers = []  # Initialize centers list
     for cnt in large_contours:
         M = cv2.moments(cnt)
-        cX = int(M["m10"] / M["m00"])
-        cY = int(M["m01"] / M["m00"])
-        centers.append((cX, cY))
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            centers.append((cX, cY))
 
-    return centers
+        # Draw a small circle at the center
+        cv2.circle(img, (cX, cY), 5, (255, 0, 0), -1)
+
+    print(centers)
+
+    # Display the image with the centers marked
+    cv2.imshow('Image with centers', img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    
+
+    
 
 # Call the function with the path to your image
-centers = detect_balls('images/image_1.png')
-print(centers)
+centers = detect_balls('images/image_4.png')
