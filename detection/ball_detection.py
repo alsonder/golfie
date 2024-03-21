@@ -15,13 +15,27 @@ def detect_balls(image_path):
     # Threshold the HSV image to get only white to light yellow colors
     mask = cv2.inRange(hsv, lower_color, upper_color)
 
-    # Bitwise-AND the mask and the original image
-    res = cv2.bitwise_and(img, img, mask=mask)
+    # Perform opening to remove small blobs
+    kernel = np.ones((5,5),np.uint8)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-    # Display the image with only white to light yellow colors
-    cv2.imshow('white to light yellow colors', res)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # Find contours in the mask
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # Filter out small contours based on area
+    min_contour_area = 5  # Adjust this value as needed
+    large_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
+
+    # Calculate the center of each contour and store in an array
+    centers = []
+    for cnt in large_contours:
+        M = cv2.moments(cnt)
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
+        centers.append((cX, cY))
+
+    return centers
 
 # Call the function with the path to your image
-detect_balls('images/image_1.png')
+centers = detect_balls('images/image_1.png')
+print(centers)
