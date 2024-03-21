@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
 
-def detect_balls(image_path):
+# Inspired https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
+
+# Function to detect balls in an image
+def detect_balls(image_path): # Livestream as input instead of image_path
     # Load the image
     img = cv2.imread(image_path, cv2.IMREAD_COLOR)
 
@@ -23,7 +26,7 @@ def detect_balls(image_path):
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Filter out small contours based on area
-    min_contour_area = 5  # Adjust this value as needed
+    min_contour_area = 5  
     large_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
 
     # Calculate the center of each contour and store in an array
@@ -45,9 +48,6 @@ def detect_balls(image_path):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    
 
-    
-
-# Call the function with the path to your image
+# This should be convertered to livestream instead of image
 centers = detect_balls('images/image_4.png')
