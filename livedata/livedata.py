@@ -20,3 +20,6 @@ class LiveData:
 
     def update_balls_data(self, position):
         self.balls_position = position
+
+    def get_balls_position(self):
+        return self.balls_position

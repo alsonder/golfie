@@ -38,9 +38,12 @@ def main():
         print("Aruco orientation:", aruco_orientation)
         live_data.update_aruco_data(aruco_position, aruco_orientation)
 
-        # Detect balls in the frame (live stream)
-        #balls_position, frame = ball_detection.detect_balls(frame, mtx, dist)
-        #live_data.update_balls_data(balls_position)
+        # Detect balls in the frame (live stream)   
+        balls_position, frame = ball_detection.detect_balls(frame, mtx, dist)
+        live_data.update_balls_data(balls_position)
+
+        # Print the updated ball positions
+        print("Updated ball positions:", live_data.get_balls_position())
 
         # Show the frame
         cv2.imshow('Live Stream', frame)
