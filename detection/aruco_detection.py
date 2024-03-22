@@ -28,6 +28,10 @@ def detect_aruco(stream, mtx, dist, markerLength):
 
         # Detect the markers in the image
         corners, ids, _ = aruco.detectMarkers(frame, dictionary, parameters=parameters)
+        
+        # Initialize lists to store positions and orientations
+        position = []
+        orientation = []
 
         # If at least one marker detected
         if ids is not None:
@@ -40,6 +44,10 @@ def detect_aruco(stream, mtx, dist, markerLength):
             # Calculate pose for each marker
             for i in range(nMarkers):
                 _, rvecs[i], tvecs[i] = cv2.solvePnP(objPoints, corners[i], mtx, dist)
+
+                # Store position and orientation
+                position.append(tvecs[i])
+                orientation.append(rvecs[i])
 
             # Draw axis for each marker
             for i in range(len(ids)):
@@ -60,4 +68,4 @@ def detect_aruco(stream, mtx, dist, markerLength):
         if cv2.waitKey(1) & 0xFF == 27:
             break
 
-    return frame_copy
+    return position, orientation, frame

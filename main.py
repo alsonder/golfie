@@ -1,7 +1,9 @@
 import cv2
+import time
 from livestream import livestream
 from calibration import camera_calibration # Import the calibration function
-from detection import aruco_detection  # Import the ArUco detection function
+from detection import aruco_detection, ball_detection  # Import the detection functions
+from livedata.livedata import LiveData  # Import the LiveData class
 
 def main():
     # Create a LiveStream object
@@ -13,6 +15,9 @@ def main():
     if not ret:
         print("Camera calibration failed")
         return
+
+    # Create a LiveData object
+    live_data = LiveData()
 
     while True:
         try:
@@ -27,8 +32,15 @@ def main():
             print("Failed to get frame")
             break
 
-        # Detect ArUco markers in the frame
-        frame = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.05)        # Show the frame
+        # Detect ArUco markers in the frame (live stream)
+        aruco_position, aruco_orientation, frame = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.05)
+        live_data.update_aruco_data(aruco_position, aruco_orientation)
+
+        # Detect balls in the frame (live stream)
+        balls_position, frame = ball_detection.detect_balls(stream, mtx, dist)
+        live_data.update_balls_data(balls_position)
+
+        # Show the frame
         cv2.imshow('Live Stream', frame)
 
         # Check if the window is open
@@ -38,6 +50,9 @@ def main():
 
         if cv2.waitKey(1) & 0xFF == ord('q'):  # Break the loop when 'q' is pressed
             break
+
+        # Update live data every second
+        time.sleep(1)
 
     # Release the stream
     stream.release()

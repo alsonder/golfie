@@ -4,12 +4,9 @@ import numpy as np
 # Inspired https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
 
 # Function to detect balls in an image
-def detect_balls(image_path): # Livestream as input instead of image_path
-    # Load the image
-    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
-
-    # Convert the image to the HSV color space
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+def detect_balls(frame, mtx, dist):
+    # Convert the frame to the HSV color space
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Define the color range for white to light yellow
     lower_color = np.array([0, 0, 200])  # white to light yellow
@@ -39,15 +36,6 @@ def detect_balls(image_path): # Livestream as input instead of image_path
             centers.append((cX, cY))
 
         # Draw a small circle at the center
-        cv2.circle(img, (cX, cY), 5, (255, 0, 0), -1)
+        cv2.circle(frame, (cX, cY), 5, (255, 0, 0), -1)
 
-    print(centers)
-
-    # Display the image with the centers marked
-    cv2.imshow('Image with centers', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-
-# This should be convertered to livestream instead of image
-centers = detect_balls('images/image_4.png')
+    return centers, frame
