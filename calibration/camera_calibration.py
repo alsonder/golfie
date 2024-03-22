@@ -11,7 +11,8 @@ MIN_POINTS = 50
 
 def calibrate_camera(stream):
     """
-    Calibrates the camera using a checkerboard pattern. 9*6 openCV chessboard (ask Aleksander)
+    Calibrates the camera using a checkerboard pattern. Print this: 9*6 openCV chessboard pattern:
+    https://github.com/kyle-bersani/opencv-examples/blob/master/CalibrationByChessboard/chessboard-to-print.pdf
 
     This function captures frames from the provided stream, detects the checkerboard pattern in each frame, and uses the detected points to calibrate the camera. The calibration parameters are then returned.
 
