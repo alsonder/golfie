@@ -80,7 +80,7 @@ def calibrate_camera(stream):
         #print("Camera matrix:")
         #print(mtx)
 
-        #print("\nDistortion coefficient:")
+        print("\nDistortion coefficient from calibration module:")
         print(dist)
 
         #print("\nRotation Vectors:")

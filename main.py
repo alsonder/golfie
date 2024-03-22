@@ -34,11 +34,13 @@ def main():
 
         # Detect ArUco markers in the frame (live stream)
         aruco_position, aruco_orientation, frame = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.05)
+        print("Aruco position:", aruco_position)
+        print("Aruco orientation:", aruco_orientation)
         live_data.update_aruco_data(aruco_position, aruco_orientation)
 
         # Detect balls in the frame (live stream)
-        balls_position, frame = ball_detection.detect_balls(stream, mtx, dist)
-        live_data.update_balls_data(balls_position)
+        #balls_position, frame = ball_detection.detect_balls(frame, mtx, dist)
+        #live_data.update_balls_data(balls_position)
 
         # Show the frame
         cv2.imshow('Live Stream', frame)
