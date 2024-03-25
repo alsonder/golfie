@@ -12,7 +12,8 @@ def detect_aruco(stream, mtx, dist, markerLength):
     #dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
     
     # Aleksander home testing confuguration
-    dictionary = aruco.getPredefinedDictionary(aruco.DICT_6X6_250)
+    # Actual robot uses 7x7_1000 dictionary
+    dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
     
     parameters = aruco.DetectorParameters()
     detector = aruco.ArucoDetector(dictionary, parameters)

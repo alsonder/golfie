@@ -12,14 +12,14 @@ class LiveData:
     def __init__(self):
         self.aruco_position = None
         self.aruco_orientation = None
-        self.balls_position = None
+        self.balls_position = []
 
     def update_aruco_data(self, position, orientation):
         self.aruco_position = position
         self.aruco_orientation = orientation
 
-    def update_balls_data(self, position):
-        self.balls_position = position
+    def update_balls_data(self, positions):
+        self.balls_position = positions
 
     def get_balls_position(self):
         return self.balls_position
