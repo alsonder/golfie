@@ -3,70 +3,39 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
-# Inspired by https://docs.opencv.org/4.9.0/d5/dae/tutorial_aruco_detection.html
-
 def detect_aruco(stream, mtx, dist, markerLength):
-    # Create an ArUco dictionary and detector
-
-    # Golfie robot uses a 7x7 ArUco dictionary with 1000 markers
-    #dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
-    
-    # Aleksander home testing confuguration
-    # Actual robot uses 7x7_1000 dictionary
+    # Create an ArUco dictionary and parameters for detector, ballsucker uses 7x7_1000
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
-    
     parameters = aruco.DetectorParameters()
-    detector = aruco.ArucoDetector(dictionary, parameters)
-
-    # Set coordinate system
-    objPoints = np.array([[-markerLength/2, markerLength/2, 0],
-                          [markerLength/2, markerLength/2, 0],
-                          [markerLength/2, -markerLength/2, 0],
-                          [-markerLength/2, -markerLength/2, 0]], dtype=np.float32)
-
-    last_print_time = time.time()
-
-    # Initialize lists to store positions and orientations
-    aruco_position = []
-    aruco_orientation = []
 
     # Capture frame-by-frame
     frame = stream.get_frame()
 
-    # Make a copy of the frame
-    frame_copy = frame.copy()
-
     # Detect the markers in the image
-    corners, ids, _ = aruco.detectMarkers(frame, dictionary, parameters=parameters)
+    corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
+    # Initialize lists to store marker corners and ids
+    aruco_corners = []
+    aruco_ids = []
 
-    # If at least one marker detected
+    # Check if any marker detected
     if ids is not None:
-        # Draw the detected markers on the image
-        aruco.drawDetectedMarkers(frame_copy, corners, ids)
+        # Draw detected markers on the frame for visualization
+        aruco.drawDetectedMarkers(frame, corners, ids)
+        
+        # Store detected corners and ids
+        aruco_corners = corners
+        aruco_ids = ids.flatten()  # Flatten the ids array for easier handling
+        
+        # Print marker info every second, should be turned off, on for debug, made a function to turn it off ez
+        print_marker_info(aruco_ids, aruco_corners)
 
-        nMarkers = len(corners)
-        rvecs, tvecs = [np.zeros((nMarkers, 3, 1), dtype=np.float32) for _ in range(2)]
+    return aruco_corners, aruco_ids, frame
 
-        # Calculate pose for each marker
-        for i in range(nMarkers):
-            _, rvecs[i], tvecs[i] = cv2.solvePnP(objPoints, corners[i], mtx, dist)
-
-            # Store position and orientation
-            aruco_position.append(tvecs[i])
-            aruco_orientation.append(rvecs[i])
-
-        # Draw axis for each marker
-        for i in range(len(ids)):
-            try:
-                cv2.drawFrameAxes(frame_copy, mtx, dist, rvecs[i], tvecs[i], 0.1)
-            except AttributeError:
-                print("drawFrameAxes function not available in this version of OpenCV")
-
-        # Print location every second
-        if time.time() - last_print_time >= 1:
-            print(f"Marker locations at {time.ctime()} are:")
-            for i in range(len(ids)):
-                print(f"Marker {ids[i]}: rvec = {rvecs[i]}, tvec = {tvecs[i]}")
-            last_print_time = time.time()
-
-    return aruco_position, aruco_orientation, frame_copy
+def print_marker_info(ids, corners, last_print_time=None, print_interval=1):
+    current_time = time.time()
+    if last_print_time is None or (current_time - last_print_time) >= print_interval:
+        print(f"Marker locations at {time.ctime()} are:")
+        for i, corner in zip(ids, corners):
+            print(f"Marker {i}: Corners = {corner}")
+        return current_time
+    return last_print_time
