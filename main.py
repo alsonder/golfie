@@ -19,6 +19,8 @@ def main():
 
     live_data = LiveData()
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30)
+    
+    # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)
     while True:
         try:
