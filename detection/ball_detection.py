@@ -16,15 +16,15 @@ def detect_balls(frame, mtx, dist):
     gaussian_blur = 1
     param1 = 57
     param2 = 13
-    min_radius = 5
-    max_radius = 7
+    min_radius = 4
+    max_radius = 6
 
     # apply mask which circle detection operates
     blurred_gray = cv2.GaussianBlur(gray, (gaussian_blur, gaussian_blur), 0)
     mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
     mask = cv2.dilate(mask, None, iterations=1)
 
-    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 20,
+    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 1,
                                param1=param1, param2=param2,
                                minRadius=min_radius, maxRadius=max_radius)
     ball_list = []
