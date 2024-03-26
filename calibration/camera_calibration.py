@@ -10,6 +10,24 @@ CHECKERBOARD = (9, 6) # Size of the checkerboard
 MIN_POINTS = 50
 
 def calibrate_camera(stream):
+    """
+    Calibrates the camera using a checkerboard pattern. Print this: 9*6 openCV chessboard pattern:
+    https://github.com/kyle-bersani/opencv-examples/blob/master/CalibrationByChessboard/chessboard-to-print.pdf
+
+    This function captures frames from the provided stream, detects the checkerboard pattern in each frame, and uses the detected points to calibrate the camera. The calibration parameters are then returned.
+
+    Parameters:
+    stream (livestream.LiveStream): The livestream object from which frames are captured.
+
+    Returns:
+    tuple: A tuple containing the following calibration parameters:
+        - ret (bool): The result of the calibration process. True if successful, False otherwise.
+        - mtx (numpy.ndarray): The camera matrix.
+        - dist (numpy.ndarray): The distortion coefficients.
+        - rvecs (list): The rotation vectors.
+        - tvecs (list): The translation vectors.
+    """
+
     # termination criteria
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
@@ -63,7 +81,7 @@ def calibrate_camera(stream):
         #print("Camera matrix:")
         #print(mtx)
 
-        #print("\nDistortion coefficient:")
+        print("\nDistortion coefficient from calibration module:")
         print(dist)
 
         #print("\nRotation Vectors:")
