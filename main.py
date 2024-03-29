@@ -9,8 +9,10 @@ from detection.balls_confirmation import BallConfirmation
 from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
+from connection.bluetooth import start_ble_client_thread
 
 def main():
+    ble_thread = start_ble_client_thread() # Start the ble connection in another thread
     stream = livestream.LiveStream()
     ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
     if not ret:

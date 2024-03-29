@@ -12,7 +12,7 @@ class LiveData:
     def __init__(self):
         self.aruco_position = None
         self.aruco_orientation = None
-        self.balls_position = []
+        self.balls_position = [] # list of firm balls
 
     def update_aruco_data(self, position, orientation):
         self.aruco_position = position
