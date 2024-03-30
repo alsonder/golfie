@@ -10,6 +10,8 @@ from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
 from connection.bluetooth import start_ble_client_thread, BLEClient
+from calibration.robotmotor_calibration import calibrate_robot_movement
+
 
 def main():
     ESP32_ADDRESS = "48:e7:29:9f:b2:a2"
@@ -28,6 +30,7 @@ def main():
     
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)
+    calibrate_robot_movement(stream, mtx, dist, ble_client)
     while True:
         try:
             frame = stream.get_frame()

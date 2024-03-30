@@ -1,9 +1,10 @@
 import asyncio
 from bleak import BleakClient
 import threading
+from robotposition.robot_control import MotorControl
 
-ESP32_ADDRESS = "48:e7:29:9f:b2:a2"
-CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+ESP32_ADDRESS = "48:e7:29:9f:b2:a2" # ESPs unique MAC adress
+CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8" # Hardcoded UUID
 
 class BLEClient:
     def __init__(self, address):
@@ -18,7 +19,7 @@ class BLEClient:
             self.connected = self.client.is_connected
             if self.connected:
                 print("Connected to ESP32")
-                await self.print_services()
+                await self.print_services() # Print characteristic values of the ble server
             else:
                 print("Failed to connect to ESP32")
         except Exception as e:
@@ -45,7 +46,7 @@ class BLEClient:
 async def run_ble_client(ble_client):
     # Ensure initial connection attempt outside of the loop to establish the connection as soon as possible
     await ble_client.connect()
-    while True:
+    while True: #Reconnect loop, blocking operation
         try:
             if not ble_client.get_connection_status():
                 print("Attempting to reconnect...")
