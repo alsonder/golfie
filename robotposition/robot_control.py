@@ -1,5 +1,4 @@
 import asyncio
-from connection.bluetooth import BLEClient
 
 CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8" # Hardcoded UUID
 
