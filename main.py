@@ -29,7 +29,9 @@ def main():
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30)
     
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
-    #calibrate_and_detect_balls(stream, mtx, dist)
+    #calibrate_and_detect_balls(stream, mtx, dist)bn
+    
+    # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     calibrate_robot_movement(stream, mtx, dist, ble_client)
     while True:
         try:
@@ -42,16 +44,17 @@ def main():
             break
         
         frame_undistorted = cv2.undistort(frame, mtx, dist)
-        front_point = None  # Reset front_point each iteration to ensure it's up-to-date
+        front_point = None  # Reset front_point each iteration to ensure its up-to-date
 
         # Process ArUco markers
         aruco_corners, aruco_ids, _ = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.08)  # Note: 'frame' is not used after this point
         if aruco_ids is not None and aruco_corners:
+            # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
                 frame_undistorted, front_point = calculate_and_draw_points(frame_undistorted, corner_group[0])
         
-        detected_balls = detect_balls(frame_undistorted, mtx, dist)  
-        current_time = time.time()
+        detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
+        current_time = time.time() 
         ball_confirmation.update_detections(detected_balls, current_time)
         confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
         live_data.update_balls_data(confirmed_balls)

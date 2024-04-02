@@ -32,7 +32,7 @@ class BLEClient:
             print("Disconnected")
         self.connected = False
 
-    def get_connection_status(self):
+    def get_connection_status(self): # Function to check connection status
         return self.connected
     
     async def print_services(self):
@@ -48,14 +48,14 @@ async def run_ble_client(ble_client):
     await ble_client.connect()
     while True: #Reconnect loop, blocking operation
         try:
-            if not ble_client.get_connection_status():
+            if not ble_client.get_connection_status(): # BLE reconnect logic
                 print("Attempting to reconnect...")
                 await ble_client.connect()
             await asyncio.sleep(10)  # Check connection status every 10 seconds
         except Exception as e:
             print(f"Error during reconnection: {e}")
 
-def start_ble_client_thread(ble_client):
+def start_ble_client_thread(ble_client): #start client connection
     def thread_target():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

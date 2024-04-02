@@ -27,7 +27,7 @@ def calibrate_robot_movement(stream, mtx, dist, ble_client):
 
             # Ensure we're passing the correct structure to calculate_direction_vector
             direction_vector = calculate_direction_vector(aruco_corners[0][0])
-            scaling_factor = calculate_scaling_factor(aruco_corners[0][0], 8)  # Assuming an 8cm ArUco marker
+            scaling_factor = calculate_scaling_factor(aruco_corners[0][0], 8)  # Assuming markerLength=0.08 m ArUco marker
             projected_point = calculate_projected_point(np.array(front_point), direction_vector, 100, scaling_factor)
             setFront_point = front_point
             
