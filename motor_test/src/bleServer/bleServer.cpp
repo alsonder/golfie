@@ -1,12 +1,11 @@
 #include "bleServer/bleServer.h"
-#include "movement/movement.h"
+#include "commands/commands.h"
 #include <Arduino.h>
-#include <BLEDevice.h>
-#include <BLEUtils.h>
-#include <BLEServer.h>
-#include <BLE2902.h> 
+
 
 BLECharacteristic *pCharacteristic;
+BLECharacteristic *pwmMotorACharacteristic;
+BLECharacteristic *pwmMotorBCharacteristic;
 
 bool isConnected = false;
 
@@ -15,67 +14,94 @@ const unsigned long commandTimeout = 1000; // Timeout in milliseconds, adjust as
 char lastCommand = '\0'; // Stores the last command received
 bool isMoving = false;
 
-class MyServerCallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) override {
-      Serial.println("Client Connected");
-      isConnected = true;
-    }
+void MyServerCallbacks::onConnect(BLEServer* pServer) {
+    Serial.println("Client Connected");
+    isConnected = true;
+}
 
-    void onDisconnect(BLEServer* pServer) override {
-      Serial.println("Client Disconnected");
-      isConnected = false;
-      BLEDevice::startAdvertising(); // Restart advertising upon disconnection
-      Serial.println("Advertising started");
-    }
-};
+void MyServerCallbacks::onDisconnect(BLEServer* pServer) {
+    Serial.println("Client Disconnected");
+    isConnected = false;
+    BLEDevice::startAdvertising(); // Restart advertising upon disconnection
+    Serial.println("Advertising started");
+}
 
-class MyCallbacks: public BLECharacteristicCallbacks {
-    void onWrite(BLECharacteristic *pCharacteristic) override {
-      std::string value = pCharacteristic->getValue();
-      if (!value.empty()) {
+void MyCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
+    std::string value = pCharacteristic->getValue();
+    if (!value.empty()) {
         char cmd = value[0];
-        handleBluetoothCommands(cmd);
-      }
+        handleBluetoothCommands(&cmd);
     }
-};
+}
 
-void handleBluetoothCommands(char cmd){
-  lastCommandTime = millis();
-  lastCommand = cmd;
-  isMoving = true; 
-    switch (cmd){
-      case 'w': 
-        moveForward(); 
-        Serial.println(cmd);
-        break;
-      case 's': 
-        moveBackward(); 
-        Serial.println(cmd);
-        break;
-      case 'a': 
-        turnLeft(); 
-        Serial.println(cmd);
-        break;
-      case 'd': 
-        turnRight(); 
-        Serial.println(cmd);
-        break; 
-      case 'c': 
-        stopMovement(); 
-        Serial.println(cmd);
-        break; 
-      case 'f': 
-        currentState = STATE_FAN_1; 
-        updateFans();
-        break;
-      case 'g': 
-        currentState = STATE_FAN_2; 
-        updateFans();
-        break;
-      case 'r': 
-        currentState = STATE_OFF; 
-        updateFans();
-        break;
-      default: break;
-    } 
+
+
+MotorPWMCallbacks::MotorPWMCallbacks(int motor) : _motor(motor) {
+    // constructor for pwm value setting
+}
+
+// onWrite method definition
+void MotorPWMCallbacks::onWrite(BLECharacteristic *pCharacteristic) {
+    std::string value = pCharacteristic->getValue();
+    if (!value.empty()) {
+        int pwmValue = std::stoi(value);
+        if (pCharacteristic == pwmMotorACharacteristic) {
+            setPwmMotorA(pwmValue);
+            Serial.println("pwm value set motor A");
+            Serial.println(pwmValue);
+        } else if (pCharacteristic == pwmMotorBCharacteristic) {
+            setPwmMotorB(pwmValue);
+            Serial.println("pwm value set motor B");
+            Serial.println(pwmValue);
+        }
+    }
+}
+
+
+void handleBluetoothCommands(char *cmd) {
+    if (cmd[0] == 'p' && strchr(cmd, ' ') != NULL) {
+        // Command to adjust PWM for Motor A: format "p <newpwmvalue>"
+        int pwmValue = atoi(strchr(cmd, ' ') + 1); // Convert the substring after the space to int
+        setPwmMotorA(pwmValue);
+        Serial.println("new pwm set motor a");
+        Serial.println(pwmValue);
+    } else if (cmd[0] == 'q' && strchr(cmd, ' ') != NULL) {
+        // Command to adjust PWM for Motor B: format "q <newpwmvalue"
+        int pwmValue = atoi(strchr(cmd, ' ') + 1); // Convert the substring after the space to int
+        setPwmMotorB(pwmValue);
+        Serial.println("new pwm set motor b");
+        Serial.println(pwmValue);
+    } else {
+        // Handle movement commands
+        switch (cmd[0]) {
+            case 'w': // Forward
+                moveForward();
+                break;
+            case 's': // Backward
+                moveBackward();
+                break;
+            case 'a': // Turn Left
+                turnLeft();
+                break;
+            case 'd': // Turn Right
+                turnRight();
+                break;
+            case 'c': // Stop
+                stopMovement();
+                break;
+            case 'f': // Fan Suck
+                currentState = STATE_FAN_1;
+                updateFans();
+                break;
+            case 'g': // Fan Blow
+                currentState = STATE_FAN_2;
+                updateFans();
+                break;
+            case 'r': // Fans Off
+                currentState = STATE_OFF;
+                updateFans();
+                break;
+            
+        }
+    }
 }
