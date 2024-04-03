@@ -14,10 +14,10 @@ from calibration.robotmotor_calibration import calibrate_robot_movement
 
 
 def main():
-    ESP32_ADDRESS = "48:e7:29:9f:b2:a2"
+    ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
 
     ble_client = BLEClient(ESP32_ADDRESS)
-    start_ble_client_thread(ble_client)  # Start the BLE client in a separate thread
+    ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
 
     stream = livestream.LiveStream()
     ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it

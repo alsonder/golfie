@@ -1,4 +1,6 @@
 import asyncio
+import threading
+import queue
 
 CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8" # Hardcoded UUID
 
@@ -40,3 +42,34 @@ class MotorControl:
 
     async def fans_off(self):
         await self.send_command('r')
+# In robot_control.py, adjust RobotMovement like this:
+
+class RobotMovement:
+    def __init__(self, motor_control):
+        self.motor_control = motor_control  # Use the MotorControl instance passed during initialization
+        self.command_queue = queue.Queue()
+        self.loop = asyncio.new_event_loop()
+        
+    def start_event_loop(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.create_task(self.process_commands())
+        self.loop.run_forever()
+
+    async def process_commands(self):
+        while True:
+            command, args = await self.loop.run_in_executor(None, self.command_queue.get)
+            try:
+                # Ensure command execution within the RobotMovement's event loop
+                await command(*args)
+            except Exception as e:
+                print(f"Error executing command: {e}")
+
+    def start(self):
+        threading.Thread(target=self.start_event_loop, daemon=True).start()
+
+    def stop(self):
+        self.loop.call_soon_threadsafe(self.loop.stop)
+
+    def send_command(self, command, *args):
+        # Command is a method from MotorControl, args are the arguments for that method
+        self.command_queue.put((command, args))

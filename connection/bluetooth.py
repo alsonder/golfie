@@ -3,7 +3,7 @@ from bleak import BleakClient
 import threading
 from robotposition.robot_control import MotorControl
 
-ESP32_ADDRESS = "48:e7:29:9f:b2:a2" # ESPs unique MAC adress
+ESP32_ADDRESS = "b0:a7:32:13:a7:26" # ESPs unique MAC adress
 CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8" # Hardcoded UUID
 
 class BLEClient:
@@ -55,12 +55,14 @@ async def run_ble_client(ble_client):
         except Exception as e:
             print(f"Error during reconnection: {e}")
 
-def start_ble_client_thread(ble_client): #start client connection
+def start_ble_client_thread(ble_client):
     def thread_target():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+        ble_client.loop = loop  # Store the event loop in the BLEClient instance for later access
         loop.run_until_complete(run_ble_client(ble_client))
 
     thread = threading.Thread(target=thread_target)
     thread.start()
-    return thread
+    return thread  # Return the thread object
+

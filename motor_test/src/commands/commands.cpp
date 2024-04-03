@@ -1,4 +1,5 @@
 #include "commands/commands.h"
+#include "bleServer/bleServer.h"
 #include <Arduino.h>
 
 
@@ -11,8 +12,8 @@ int motorB1 = 32; // IN3 on the L298N
 int motorB2 = 33; // IN4 on the L298N
 int motorBEnable = 14; // ENB on the L298N
 
-int pwmMotorA = 110;
-int pwmMotorB = 130;
+int pwmMotorA = 110; //left motor
+int pwmMotorB = 130; //right motor
 
 int currentState = STATE_OFF;
 
@@ -86,4 +87,19 @@ void updateFans(){
       digitalWrite(BLOWER_FAN, LOW);   // Turn on Fan 2
       break;
   }
+}
+
+void setPwmMotorA(int pwmValue) {
+    pwmMotorA = pwmValue;
+    // Update the BLE characteristic with the new value
+    std::string value = std::to_string(pwmValue);
+    pwmMotorACharacteristic->setValue(value);
+    pwmMotorACharacteristic->notify(); // Send notification to connected clients
+}
+
+void setPwmMotorB(int pwmValue) {
+    pwmMotorB = pwmValue;
+    std::string value = std:: to_string(pwmValue);
+    pwmMotorBCharacteristic -> setValue(value);
+    pwmMotorBCharacteristic->notify();
 }
