@@ -186,7 +186,8 @@ def visualize_grid(grid, src, dest, path):
         draw.rectangle([node[1] * CELL_SIZE, node[0] * CELL_SIZE, (node[1] + 1) * CELL_SIZE, (node[0] + 1) * CELL_SIZE], fill=COLOR_PATH)
 
     draw.rectangle([src[1] * CELL_SIZE, src[0] * CELL_SIZE, (src[1] + 1) * CELL_SIZE, (src[0] + 1) * CELL_SIZE], fill=COLOR_SOURCE)
-    draw.rectangle([dest[1] * CELL_SIZE, dest[0] * CELL_SIZE, (dest[1] + 1) * CELL_SIZE, (dest[0] + 1) * CELL_SIZE], fill=COLOR_DESTINATION)
+    for point in dest:
+        draw.rectangle([point[1] * CELL_SIZE, point[0] * CELL_SIZE, (point[1] + 1) * CELL_SIZE, (point[0] + 1) * CELL_SIZE], fill=COLOR_DESTINATION)
 
     img.show()
 
@@ -205,15 +206,27 @@ def main():
         grid[row//2][i] = 0
 
     # Define the source and destination
-    src = [1, 1]
-    dest = [98,90]
-    dest2 = [25, 90]
+    #dest = [98,90]
+    #dest2 = [80, 80]
 
+    #needs input from shortest path
+    #calculates A* algorithm linearly, so not most optimal if you swap the values.
+    points = [[51, 51], [90, 90], [80, 10], [20, 2], [0, 0], [10, 30], [49, 49]]
+    src = points.pop(0)
+    
+
+    path = []
+    current_src = src
+    
+    for dest in points:
+        path += a_star_search(grid, current_src, dest)
+        current_src = dest
     # Run the A* search algorithm
-    path = a_star_search(grid, src, dest2)
-    path+= a_star_search(grid, dest2, dest)
+    #path = a_star_search(grid, src, dest2)
+    #path+= a_star_search(grid, dest2, dest)
+
     if path is not None:
-        visualize_grid(grid, src, dest, path)
+        visualize_grid(grid, src, points, path)
 
 if __name__ == "__main__":
     main()
