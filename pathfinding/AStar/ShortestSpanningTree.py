@@ -4,6 +4,7 @@ import math
 def intersects_obstacle(point1, point2):
 
     # Define the cross obstacle coordinates
+    # Currently ranges from [40 to 60,50] and [50, 40 to 60] this is to resemble our cross
     cross_obstacle = {(50,50)}
     for i in range(20):
         if i != 10:
@@ -25,11 +26,11 @@ def intersects_obstacle(point1, point2):
     return False
 
 def distance(point1, point2):
-    """Calculate the Euclidean distance between two points."""
+    #Calculate the Euclidean distance between two points.
     return math.sqrt((point1[0] - point2[0])**2 + (point1[1] - point2[1])**2)
 
 def total_distance(points):
-    """Calculate the total distance of a path, considering the obstacle."""
+    #Calculate the total distance of a path, considering the obstacle.
     total_dist = 0
     for i in range(len(points) - 1):
         if intersects_obstacle(points[i], points[i+1]):
