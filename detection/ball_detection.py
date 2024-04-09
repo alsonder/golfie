@@ -13,6 +13,9 @@ def detect_balls(frame, mtx, dist):
     # Change below according to the best setting found during calibrate_and_detect_balls()
     lower_hsv = np.array([160, 215, 0])
     upper_hsv = np.array([179, 255, 255])
+    lower_orange_hsv = np.array([0,0,0])
+    upper_orange_hsv = np.array([0,0,0])
+
     gaussian_blur = 1
     param1 = 57
     param2 = 13
@@ -21,8 +24,11 @@ def detect_balls(frame, mtx, dist):
 
     # apply mask which circle detection operates
     blurred_gray = cv2.GaussianBlur(gray, (gaussian_blur, gaussian_blur), 0)
+
     mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
     mask = cv2.dilate(mask, None, iterations=1)
+    mask_orange = cv2.inRange(hsv, lower_orange_hsv, upper_orange_hsv)
+    mask_orange = cv2.dilate(mask_orange, None, iterations=1)
 
     circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 1,
                                param1=param1, param2=param2,
@@ -32,5 +38,15 @@ def detect_balls(frame, mtx, dist):
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
             ball_list.append([i[0], i[1]])
+    
+    # Detect circles for orange balls
+    circles_orange = cv2.HoughCircles(mask_orange, cv2.HOUGH_GRADIENT, 1, 1,
+                                      param1=param1, param2=param2,
+                                      minRadius=min_radius, maxRadius=max_radius)
+    orange_ball_list = []
+    if circles_orange is not None:
+        circles_orange = np.uint16(np.around(circles_orange))
+        for i in circles_orange[0, :]:
+            orange_ball_list.append([i[0], i[1]])
 
-    return ball_list  # Returns only the list of detected balls without confirmation status (list of unfirm balls)
+    return ball_list, orange_ball_list  # Returns only the list of detected balls without confirmation status (list of unfirm balls)

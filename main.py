@@ -39,7 +39,7 @@ def main():
             for corner_group in aruco_corners:
                 frame_undistorted, front_point = calculate_and_draw_points(frame_undistorted, corner_group[0])
         
-        detected_balls = detect_balls(frame_undistorted, mtx, dist)  
+        detected_balls, orange_ball = detect_balls(frame_undistorted, mtx, dist)  
         current_time = time.time()
         ball_confirmation.update_detections(detected_balls, current_time)
         confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
