@@ -1,0 +1,92 @@
+import cv2
+import numpy as np
+import base64
+from inference_sdk import InferenceHTTPClient
+from PIL import Image, ImageDraw, ImageFont
+import io
+import os
+
+# Initialize the inference client
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="EQrKZhgL8SxzifXnmxn9"
+)
+
+# Path to the video file
+video_path = r"C:\Users\hanso\Desktop\20240320_102424.mp4"
+
+# Initialize the video capture object
+cap = cv2.VideoCapture(video_path)
+
+# Check if the video is opened successfully
+if not cap.isOpened():
+    print("Error: Failed to open the video file.")
+    exit()
+
+# Process each frame in the video
+frame_index = 0
+while True:
+    # Seek to the desired frame index
+    cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+
+    # Read a frame from the video
+    ret, frame = cap.read()
+
+    # Check if the frame is read successfully
+    if not ret:
+        break
+
+    # Convert the frame to base64
+    _, buffer = cv2.imencode('.jpg', frame)
+    jpeg_as_bytes = buffer.tobytes()
+
+    # Perform inference using the base64 image data
+    result = CLIENT.infer(base64.b64encode(jpeg_as_bytes).decode('utf-8'), model_id="golfie/5")
+
+    # Print the inference result
+    #print(result)
+    ### BETTER PRINT ###
+    predictions = result.get("predictions", [])
+
+    print("Predictions:")
+    print("--------------")
+    for idx, prediction in enumerate(predictions, 1):
+        print(f"Prediction {idx}:")
+        print(f"  Class: {prediction['class']}")
+        print(f"  Confidence: {prediction['confidence']:.2f}")
+        print(f"  Bounding Box: ({prediction['x']}, {prediction['y']}) - ({prediction['x'] + prediction['width']}, {prediction['y'] + prediction['height']})")
+        print("--------------")
+    print(f"Total predictions: {len(predictions)}")
+
+    # Convert the frame to PIL Image
+    pil_image = Image.open(io.BytesIO(jpeg_as_bytes))
+
+    # Draw coordinates of detected balls on the image
+    draw = ImageDraw.Draw(pil_image)
+    font = ImageFont.truetype("arial.ttf", 16)
+    for prediction in result['predictions']:
+        x, y = int(prediction['x']), int(prediction['y'])  # Convert coordinates to integers
+        draw.text((x, y), f"({x}, {y})", fill=(255, 0, 0), font=font)
+
+    # Display the PIL Image
+    pil_image.show()
+
+
+
+    video_path = r"C:\Users\hanso\Desktop\20240320_102424.mp4"
+    output_folder = os.path.join(os.path.dirname(video_path), "img_vidtes3v1")
+
+    # Save the image with annotations
+    image_name = f"frame_{frame_index}.jpg"
+    output_path = os.path.join(output_folder, image_name)
+    pil_image.save(output_path)
+
+
+
+    # Increment frame index
+    frame_index += 180  # Adjust as needed
+
+# Release the video capture object
+cap.release()
+
+''''''

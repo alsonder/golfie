@@ -18,9 +18,9 @@ base64_image = base64.b64encode(image_data).decode("utf-8")
 
 result = CLIENT.infer(base64_image, model_id="golfie/5")
 
-print(result)
+#print(result)
 
-'''
+
 ### BETTER PRINT ###
 predictions = result.get("predictions", [])
 
@@ -33,4 +33,3 @@ for idx, prediction in enumerate(predictions, 1):
     print(f"  Bounding Box: ({prediction['x']}, {prediction['y']}) - ({prediction['x'] + prediction['width']}, {prediction['y'] + prediction['height']})")
     print("--------------")
 print(f"Total predictions: {len(predictions)}")
-'''
