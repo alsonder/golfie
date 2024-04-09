@@ -42,7 +42,6 @@ class MotorControl:
 
     async def fans_off(self):
         await self.send_command('r')
-# In robot_control.py, adjust RobotMovement like this:
 
 class RobotMovement:
     def __init__(self, motor_control):

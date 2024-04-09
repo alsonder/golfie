@@ -9,18 +9,20 @@ def detect_balls(frame, mtx, dist):
     frame_undistorted = cv2.undistort(frame, mtx, dist)
     hsv = cv2.cvtColor(frame_undistorted, cv2.COLOR_BGR2HSV)
     gray = cv2.cvtColor(frame_undistorted, cv2.COLOR_BGR2GRAY)
-    
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    # Apply the CLAHE filter to the grayscale image
+    clahe_gray = clahe.apply(gray)
     # Change below according to the best setting found during calibrate_and_detect_balls()
-    lower_hsv = np.array([160, 215, 0])
+    lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
     gaussian_blur = 1
     param1 = 57
     param2 = 13
-    min_radius = 4
-    max_radius = 6
+    min_radius = 8
+    max_radius = 10
 
     # apply mask which circle detection operates
-    blurred_gray = cv2.GaussianBlur(gray, (gaussian_blur, gaussian_blur), 0)
+    blurred_gray = cv2.GaussianBlur(clahe_gray, (gaussian_blur, gaussian_blur), 0)
     mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
     mask = cv2.dilate(mask, None, iterations=1)
 

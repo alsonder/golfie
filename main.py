@@ -11,28 +11,39 @@ from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
 from connection.bluetooth import start_ble_client_thread, BLEClient
 from calibration.robotmotor_calibration import calibrate_robot_movement
+from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
+import os
 
 
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
-
+    CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
     ble_client = BLEClient(ESP32_ADDRESS)
     ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
 
     stream = livestream.LiveStream()
-    ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
-    if not ret:
-        print("Camera calibration failed")
-        return
-
+    mtx, dist = None, None   
+    #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
+    # if not ret:
+    #     print("Camera calibration failed")
+    #     return
     live_data = LiveData()
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30)
-    
+    #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
+
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
-    #calibrate_and_detect_balls(stream, mtx, dist)bn
+    #calibrate_and_detect_balls(stream, mtx, dist)
+    if os.path.exists(CALIBRATION_FILE_PATH):
+        mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+        print("Loaded existing calibration parameters.")
+    else:
+        print("Calibration parameters not found. Please run calibration process.")
+        collect_calibration_images(stream, "calibration_images", num_images=40)
+        calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     
+
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
-    calibrate_robot_movement(stream, mtx, dist, ble_client)
+    #calibrate_robot_movement(stream, mtx, dist, ble_client)
     while True:
         try:
             frame = stream.get_frame()
@@ -47,7 +58,7 @@ def main():
         front_point = None  # Reset front_point each iteration to ensure its up-to-date
 
         # Process ArUco markers
-        aruco_corners, aruco_ids, _ = aruco_detection.detect_aruco(stream, mtx, dist, markerLength=0.08)  # Note: 'frame' is not used after this point
+        aruco_corners, aruco_ids, _ = aruco_detection.detect_aruco(frame_undistorted, mtx, dist, markerLength=0.08)  # Note: 'frame' is not used after this point
         if aruco_ids is not None and aruco_corners:
             # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
