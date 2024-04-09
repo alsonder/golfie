@@ -1,0 +1,36 @@
+# import the inference-sdk
+import os
+from inference_sdk import InferenceHTTPClient
+import base64
+
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="EQrKZhgL8SxzifXnmxn9"
+)
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+image_path = os.path.join(script_dir, "image_1.png")
+
+#encode base64 (needed for infer later)
+with open(image_path, "rb") as image_file:
+    image_data = image_file.read()
+base64_image = base64.b64encode(image_data).decode("utf-8")
+
+result = CLIENT.infer(base64_image, model_id="golfie/5")
+
+print(result)
+
+'''
+### BETTER PRINT ###
+predictions = result.get("predictions", [])
+
+print("Predictions:")
+print("--------------")
+for idx, prediction in enumerate(predictions, 1):
+    print(f"Prediction {idx}:")
+    print(f"  Class: {prediction['class']}")
+    print(f"  Confidence: {prediction['confidence']:.2f}")
+    print(f"  Bounding Box: ({prediction['x']}, {prediction['y']}) - ({prediction['x'] + prediction['width']}, {prediction['y'] + prediction['height']})")
+    print("--------------")
+print(f"Total predictions: {len(predictions)}")
+'''

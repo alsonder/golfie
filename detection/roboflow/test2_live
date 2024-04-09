@@ -1,0 +1,34 @@
+import cv2
+import numpy as np
+import base64
+from inference_sdk import InferenceHTTPClient
+
+# Initialize the inference client
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="EQrKZhgL8SxzifXnmxn9"
+)
+
+# Initialize the webcam
+cap = cv2.VideoCapture(0)
+
+# Capture a frame from the webcam
+ret, frame = cap.read()
+
+# Check if the frame is captured successfully
+if not ret:
+    print("Failed to capture frame from webcam.")
+    exit()
+
+# Convert the frame to base64
+_, buffer = cv2.imencode('.jpg', frame)
+jpeg_as_text = base64.b64encode(buffer)
+
+# Perform inference using the base64 image data
+result = CLIENT.infer(jpeg_as_text.decode('utf-8'), model_id="golfie/5")
+
+# Print the inference result
+print(result)
+
+# Release the webcam
+cap.release()
