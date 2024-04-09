@@ -27,7 +27,7 @@ def detect_aruco(stream, mtx, dist, markerLength):
         aruco_ids = ids.flatten()  # Flatten the ids array for easier handling
         
         # Print marker info every second, should be turned off, on for debug, made a function to turn it off ez
-        print_marker_info(aruco_ids, aruco_corners)
+        #print_marker_info(aruco_ids, aruco_corners)
 
     return aruco_corners, aruco_ids, frame
 
