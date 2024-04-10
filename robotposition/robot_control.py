@@ -42,6 +42,16 @@ class MotorControl:
 
     async def fans_off(self):
         await self.send_command('r')
+        
+    async def set_pwm_motor_a(self, pwm_value):
+        """Set PWM for motor A."""
+        command = f"p {pwm_value}"
+        await self.send_command(command)
+
+    async def set_pwm_motor_b(self, pwm_value):
+        """Set PWM for motor B."""
+        command = f"q {pwm_value}"
+        await self.send_command(command)
 
 class RobotMovement:
     def __init__(self, motor_control):

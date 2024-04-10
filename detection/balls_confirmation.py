@@ -4,9 +4,10 @@ import numpy as np
 class BallConfirmation:
     # pass in variables for confirmation, 20% of the frames must contain tthe circle for it to become a firm ball, to be a removed ball 80% of 
     #frames must be without the ball, if its been still for 5 seconds, it becomes a firm ball, usage in a camera which processes 30 fps
-    def __init__(self, confirmation_threshold=0.18, removal_threshold=0.8, time_window=5, frame_rate=30):
+    def __init__(self, confirmation_threshold=0.18, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=8):
         self.confirmation_threshold = confirmation_threshold
         self.removal_threshold = removal_threshold
+        self.ball_count=ball_count
         self.time_window = time_window
         self.frame_rate = frame_rate
         self.detections = {}
@@ -30,6 +31,7 @@ class BallConfirmation:
                 # Update timestamp for closely matched confirmed ball
                 self.confirmed_balls[close_to_confirmed] = current_time
             else:
+                
                 if ball_id not in self.detections:
                     self.detections[ball_id] = []
                 self.detections[ball_id].append(current_time)
@@ -66,3 +68,6 @@ class BallConfirmation:
     # Returns positions of firm balls
     def get_confirmed_balls_positions(self):
         return [list(ball_id) for ball_id in self.confirmed_balls.keys()]
+
+    def is_target_count_reached(self):
+        return len(self.confirmed_balls) >= self.target_ball_count
