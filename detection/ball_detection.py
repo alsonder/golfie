@@ -16,10 +16,10 @@ def detect_balls(frame, mtx, dist):
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
     gaussian_blur = 1
-    param1 = 57
+    param1 = 50
     param2 = 13
-    min_radius = 8
-    max_radius = 10
+    min_radius = 7
+    max_radius = 9
 
     # apply mask which circle detection operates
     blurred_gray = cv2.GaussianBlur(clahe_gray, (gaussian_blur, gaussian_blur), 0)
