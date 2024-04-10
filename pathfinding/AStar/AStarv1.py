@@ -40,31 +40,6 @@ def is_destination(row, col, dest):
 def calculate_h_value(row, col, dest):
     return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
 
-# Trace the path from source to destination
-def trace_path(cell_details, dest):
-    print("The Path is ")
-    path = []
-    row = dest[0]
-    col = dest[1]
-
-    # Trace the path from destination to source using parent cells
-    while not (cell_details[row][col].parent_i == row and cell_details[row][col].parent_j == col):
-        path.append((row, col))
-        temp_row = cell_details[row][col].parent_i
-        temp_col = cell_details[row][col].parent_j
-        row = temp_row
-        col = temp_col
-
-    # Add the source cell to the path
-    path.append((row, col))
-    # Reverse the path to get the path from source to destination
-    path.reverse()
-
-    # Print the path
-    for i in path:
-        print("->", i, end=" ")
-    print()
-
 # Implement the A* search algorithm
 def a_star_search(grid, src, dest):
     # Check if the source and destination are valid
@@ -165,6 +140,8 @@ def a_star_search(grid, src, dest):
         col = temp_col
     path.append((row, col))
     path.reverse()
+
+    
     return path
 
 def visualize_grid(grid, src, dest, path):
@@ -191,6 +168,7 @@ def visualize_grid(grid, src, dest, path):
 
     img.show()
 
+import time
 
 def main():
     # Define the grid (1 for unblocked, 0 for blocked)
@@ -198,7 +176,8 @@ def main():
     row = ROW
     col = COL
     arm_length = 20
-
+    #
+    start_time = time.time()
     # Define the new grid with all elements initialized to 0
     grid = [[1 for _ in range(col)] for _ in range(row)]
     for i in range(row//2 - arm_length, row//2 + arm_length + 1):
@@ -211,13 +190,12 @@ def main():
 
     #needs input from shortest path
     #calculates A* algorithm linearly, so not most optimal if you swap the values.
-    points = [[51, 51], [90, 90], [80, 10], [20, 2], [0, 0], [10, 30], [49, 49]]
+    points = [[10, 90], [80, 70], [65, 40], [51, 49], [51, 8], [20, 15], [10, 10]]
     src = points.pop(0)
     
 
     path = []
     current_src = src
-    
     for dest in points:
         path += a_star_search(grid, current_src, dest)
         current_src = dest
