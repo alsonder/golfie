@@ -11,7 +11,7 @@ from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
 from connection.bluetooth import start_ble_client_thread, BLEClient
 from calibration.robotmotor_calibration import calibrate_robot_movement
-
+from detection.goal_detection import detect_small_goal
 
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
@@ -28,6 +28,17 @@ def main():
     live_data = LiveData()
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30)
     
+    # define frame to detect goal : 
+    while True:
+        goal_frame = stream.get_frame()
+        if goal_frame is None:
+            print("Failed to capture frame from the stream")
+        else: break
+
+    # detect goal at beginning:
+    small_goal_coords = detect_small_goal(goal_frame, shifter=12) # shifter makes the coordinate to the mid of field
+    print(small_goal_coords)
+
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)bn
     
@@ -53,10 +64,10 @@ def main():
             for corner_group in aruco_corners:
                 frame_undistorted, front_point = calculate_and_draw_points(frame_undistorted, corner_group[0])
         
-        detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
+        detected_balls = detect_balls(frame_undistorted, mtx, dist)  +  small_goal_coords  # Keep checking for moving objects
         current_time = time.time() 
         ball_confirmation.update_detections(detected_balls, current_time)
-        confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
+        confirmed_balls = ball_confirmation.get_confirmed_balls_positions() 
         live_data.update_balls_data(confirmed_balls)
 
         # Draw detected and confirmed balls
