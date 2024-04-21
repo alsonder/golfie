@@ -30,6 +30,9 @@ def main():
     
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)bn
+
+    # detect goal at beginning:
+    
     
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     calibrate_robot_movement(stream, mtx, dist, ble_client)
