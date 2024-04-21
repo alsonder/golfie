@@ -11,6 +11,7 @@ from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
 from connection.bluetooth import start_ble_client_thread, BLEClient
 from calibration.robotmotor_calibration import calibrate_robot_movement
+from detection.goal_detection import detect_small_goal
 
 
 def main():
@@ -31,8 +32,16 @@ def main():
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)bn
 
+    # define frame to detect goal : 
+    while True:
+        goal_frame = stream.get_frame()
+        if goal_frame is None:
+            print("Failed to capture frame from the stream")
+        else: break
+
     # detect goal at beginning:
-    
+    small_goal_coords = detect_small_goal(goal_frame, shifter=12) # shifter makes the coordinate to the mid of field
+    print(small_goal_coords)
     
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     calibrate_robot_movement(stream, mtx, dist, ble_client)
@@ -59,7 +68,7 @@ def main():
         detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
         current_time = time.time() 
         ball_confirmation.update_detections(detected_balls, current_time)
-        confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
+        confirmed_balls = ball_confirmation.get_confirmed_balls_positions()  +  small_goal_coords
         live_data.update_balls_data(confirmed_balls)
 
         # Draw detected and confirmed balls
