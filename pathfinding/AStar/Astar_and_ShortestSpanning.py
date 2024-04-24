@@ -133,26 +133,28 @@ def a_star_search(grid, src, dest):
     return path 
 
 def nearest_neighbor(grid, points):
-    end = points[-1]
+    start = points[-1]  # Start from what is initially considered the end
     other_points = points[:-1]
+    
     path = []
     unvisited = set(other_points)
-    current_point = other_points[0]  # start from the first point arbitrarily
+    current_point = start
     visit_order = [current_point]
-    unvisited.remove(current_point)
 
     # Travel to the nearest unvisited point each time
     while unvisited:
-        next_point = min(unvisited, key=lambda x: calculate_h_value(current_point[1],current_point[0], x))
+        next_point = min(unvisited, key=lambda x: calculate_h_value(current_point[1], current_point[0], x))
         path.extend(a_star_search(grid, current_point, next_point)[:-1])  # path without repeating last node
         current_point = next_point
         visit_order.append(current_point)
         unvisited.remove(current_point)
 
-    # Finally, go to the last point
-    path.extend(a_star_search(grid, current_point, end))
-    visit_order.append(end)
+    # Reverse the path and visit order to simulate starting at any point and ending at the specified end point
+    path.reverse()  # Reverse the complete path
+    visit_order.reverse()  # Reverse the order of visits
+    
     return path, visit_order
+
 
 def gridCreation(row, col, arm_length, eggLocation):
 

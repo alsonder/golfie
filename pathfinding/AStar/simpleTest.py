@@ -6,7 +6,7 @@ from displayer import visualize_grid
 
 ROW, COL = 1024,768
 
-points = [(10,10), (190,90), (170,40), (1000,760)]
+points = [(190,90), (1000,760), (10,10), (170,40), (100,700), (30,20)]
 
 #format of grid is grid[column][row]
 
