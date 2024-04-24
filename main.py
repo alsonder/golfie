@@ -33,7 +33,7 @@ def main():
     #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     total_balls = 8
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
-    calibrate_and_detect_balls(stream, mtx, dist)
+    #calibrate_and_detect_balls(stream, mtx, dist)
     if os.path.exists(CALIBRATION_FILE_PATH):
         mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
         print("Loaded existing calibration parameters.")

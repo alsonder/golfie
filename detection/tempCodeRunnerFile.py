@@ -21,7 +21,7 @@ mtx = None
 dist = None
 frame = cv2.imread('../images_w_egg/image_0.png')
 
-ball_list = detect_egg(frame, mtx, dist)
+ball_list = detect_balls(frame, mtx, dist)
 
 print("hello")
 

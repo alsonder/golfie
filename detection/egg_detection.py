@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-"""This function detects all balls using houghcircles, it outputs the coordinates in pixels and sends it to the confirm balls, 
+"""This function detects all circles using houghcircles, it outputs the coordinates in pixels and sends it to the confirm balls, 
     for insertion in the list, this also detects loose balls in the wild, if there is a ball being pushed, it notices
     and sends it to confirmation"""
 
@@ -16,11 +16,11 @@ def detect_egg(frame, mtx, dist):
     # Change below according to the best setting found during calibrate_and_detect_balls()
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
-    gaussian_blur = 1
+    gaussian_blur = 6
     param1 = 50
-    param2 = 13
-    min_radius = 7
-    max_radius = 9
+    param2 = 12
+    min_radius = 13
+    max_radius = 17
 
     # apply mask which circle detection operates
     blurred_gray = cv2.GaussianBlur(clahe_gray, (gaussian_blur, gaussian_blur), 0)
