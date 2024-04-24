@@ -9,7 +9,7 @@ from detection.balls_confirmation import BallConfirmation
 from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
-from connection.bluetooth import start_ble_client_thread, BLEClient
+#from connection.bluetooth import start_ble_client_thread, BLEClient
 from calibration.robotmotor_calibration import calibrate_robot_movement
 from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
 import os
@@ -19,8 +19,8 @@ from robotposition.navigation import navigate_to_ball
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
-    ble_client = BLEClient(ESP32_ADDRESS)
-    ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
+#   ble_client = BLEClient(ESP32_ADDRESS)
+#   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
 
     stream = livestream.LiveStream()
     mtx, dist = None, None   
@@ -33,7 +33,7 @@ def main():
     #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     total_balls = 8
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
-    #calibrate_and_detect_balls(stream, mtx, dist)
+    calibrate_and_detect_balls(stream, mtx, dist)
     if os.path.exists(CALIBRATION_FILE_PATH):
         mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
         print("Loaded existing calibration parameters.")
