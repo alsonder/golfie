@@ -1,0 +1,39 @@
+import cv2
+import numpy as np
+
+def detect_eggs(image_path):
+    frame = cv2.imread(image_path)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+    # Adjust the HSV color range for the egg
+    lower_hsv = np.array([20, 50, 50])
+    upper_hsv = np.array([40, 255, 255])
+    
+    # Adjust other parameters as needed
+    gaussian_blur = 5
+    param1 = 50
+    param2 = 30
+    min_radius = 15
+    max_radius = 30
+
+    blurred_gray = cv2.GaussianBlur(gray, (gaussian_blur, gaussian_blur), 0)
+    mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
+    mask = cv2.dilate(mask, None, iterations=1)
+
+    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 20,
+                               param1=param1, param2=param2,
+                               minRadius=min_radius, maxRadius=max_radius)
+    egg_list = []
+    if circles is not None:
+        circles = np.uint16(np.around(circles))
+        for i in circles[0, :]:
+            egg_list.append([i[0], i[1]])
+
+    return egg_list  # Returns only the list of detected eggs without confirmation status
+
+# Example usage:
+image_path = "images/demo_image_1.png"
+eggs_detected = detect_eggs(image_path)
+print("Number of eggs detected:", len(eggs_detected))
+print("Coordinates of detected eggs:", eggs_detected)
