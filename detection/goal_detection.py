@@ -46,5 +46,5 @@ def detect_small_goal(image_path, shifter=12, model_id="golfie/5"):
     return small_goal_coordinates
 
 # Example usage:
-image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "roboflow/image_1.png")
-small_goal_coords = detect_small_goal(image_path, shifter=12)
+#image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "roboflow/image_1.png")
+#small_goal_coords = detect_small_goal(image_path, shifter=12)
