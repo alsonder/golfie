@@ -1,15 +1,4 @@
-import math
 import heapq
-from PIL import Image, ImageDraw
-
-# Define cell size for visualization
-CELL_SIZE = 50
-# Define colors for visualization
-COLOR_BLOCKED = (0, 0, 0)  # Black
-COLOR_UNBLOCKED = (255, 255, 255)  # White
-COLOR_PATH = (0, 255, 0)  # Green
-COLOR_SOURCE = (255, 0, 0)  # Red
-COLOR_DESTINATION = (0, 0, 255)  # Blue
 
 # Define the Cell class
 class Cell:
@@ -20,12 +9,8 @@ class Cell:
         self.g = float('inf') # Cost from start to this cell
         self.h = 0 # Heuristic cost from this cell to destination
 
-# Define the size of the grid
-ROW = 100
-COL = 100
 
-# Check if a cell is valid (within the grid)
-def is_valid(row, col):
+def is_valid(row, col, ROW, COL):
     return (row >= 0) and (row < ROW) and (col >= 0) and (col < COL)
 
 # Check if a cell is unblocked
@@ -40,35 +25,14 @@ def is_destination(row, col, dest):
 def calculate_h_value(row, col, dest):
     return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
 
-# Trace the path from source to destination
-def trace_path(cell_details, dest):
-    print("The Path is ")
-    path = []
-    row = dest[0]
-    col = dest[1]
-
-    # Trace the path from destination to source using parent cells
-    while not (cell_details[row][col].parent_i == row and cell_details[row][col].parent_j == col):
-        path.append((row, col))
-        temp_row = cell_details[row][col].parent_i
-        temp_col = cell_details[row][col].parent_j
-        row = temp_row
-        col = temp_col
-
-    # Add the source cell to the path
-    path.append((row, col))
-    # Reverse the path to get the path from source to destination
-    path.reverse()
-
-    # Print the path
-    for i in path:
-        print("->", i, end=" ")
-    print()
-
 # Implement the A* search algorithm
+# this function returns the most optimal path from a to b, where the grid is an array of tubles, src and dest is also a tuble of coordinates
+# the output is an array of tuples for each coordinate visited in the proper order as the path
 def a_star_search(grid, src, dest):
+    ROW = len(grid)
+    COL = len(grid[0])
     # Check if the source and destination are valid
-    if not is_valid(src[0], src[1]) or not is_valid(dest[0], dest[1]):
+    if not is_valid(src[0], src[1], ROW, COL) or not is_valid(dest[0], dest[1], ROW, COL):
         print("Source or destination is invalid")
         return None
 
@@ -120,7 +84,7 @@ def a_star_search(grid, src, dest):
             new_j = j + dir[1]
 
             # If the successor is valid, unblocked, and not visited
-            if is_valid(new_i, new_j) and is_unblocked(grid, new_i, new_j) and not closed_list[new_i][new_j]:
+            if is_valid(new_i, new_j, ROW, COL) and is_unblocked(grid, new_i, new_j) and not closed_list[new_i][new_j]:
                 # If the successor is the destination
                 if is_destination(new_i, new_j, dest):
                     # Set the parent of the destination cell
@@ -164,56 +128,55 @@ def a_star_search(grid, src, dest):
         row = temp_row
         col = temp_col
     path.append((row, col))
-    path.reverse()
-    return path
 
-def visualize_grid(grid, src, dest, path):
-    width = len(grid[0]) * CELL_SIZE
-    height = len(grid) * CELL_SIZE
+    print("path to node found")
+    return path 
 
-    img = Image.new("RGB", (width, height), COLOR_UNBLOCKED)
-    draw = ImageDraw.Draw(img)
+def nearest_neighbor(grid, points):
+    start = points[-1]  # Start from what is initially considered the end
+    other_points = points[:-1]
+    
+    path = []
+    unvisited = set(other_points)
+    current_point = start
+    visit_order = [current_point]
 
-    for i in range(len(grid)):
-        for j in range(len(grid[0])):
-            if grid[i][j] == 0:
-                cell_color = (128, 128, 128)  # Grey color
-            else:
-                cell_color = COLOR_UNBLOCKED
-            draw.rectangle([j * CELL_SIZE, i * CELL_SIZE, (j + 1) * CELL_SIZE, (i + 1) * CELL_SIZE], fill=cell_color)
+    # Travel to the nearest unvisited point each time
+    while unvisited:
+        next_point = min(unvisited, key=lambda x: calculate_h_value(current_point[1], current_point[0], x))
+        path.extend(a_star_search(grid, current_point, next_point)[:-1])  # path without repeating last node
+        current_point = next_point
+        visit_order.append(current_point)
+        unvisited.remove(current_point)
 
-    for node in path:
-        draw.rectangle([node[1] * CELL_SIZE, node[0] * CELL_SIZE, (node[1] + 1) * CELL_SIZE, (node[0] + 1) * CELL_SIZE], fill=COLOR_PATH)
-
-    draw.rectangle([src[1] * CELL_SIZE, src[0] * CELL_SIZE, (src[1] + 1) * CELL_SIZE, (src[0] + 1) * CELL_SIZE], fill=COLOR_SOURCE)
-    draw.rectangle([dest[1] * CELL_SIZE, dest[0] * CELL_SIZE, (dest[1] + 1) * CELL_SIZE, (dest[0] + 1) * CELL_SIZE], fill=COLOR_DESTINATION)
-
-    img.show()
+    # Reverse the path and visit order to simulate starting at any point and ending at the specified end point
+    path.reverse()  # Reverse the complete path
+    visit_order.reverse()  # Reverse the order of visits
+    
+    return path, visit_order
 
 
-def main():
-    # Define the grid (1 for unblocked, 0 for blocked)
-    # Define the size of the new grid
-    row = ROW
-    col = COL
-    arm_length = 20
+def gridCreation(row, col, arm_length, eggLocation):
 
-    # Define the new grid with all elements initialized to 0
+    # Define the new grid with all elements initialized to 1
     grid = [[1 for _ in range(col)] for _ in range(row)]
-    for i in range(row//2 - arm_length, row//2 + arm_length + 1):
-        grid[i][col//2] = 0
-        grid[row//2][i] = 0
 
-    # Define the source and destination
-    src = [1, 1]
-    dest = [98,90]
-    dest2 = [25, 90]
+    # Calculate the center of the grid
+    center_row = row // 2
+    center_col = col // 2
 
-    # Run the A* search algorithm
-    path = a_star_search(grid, src, dest2)
-    path+= a_star_search(grid, dest2, dest)
-    if path is not None:
-        visualize_grid(grid, src, dest, path)
+    # Initialize the cross in the middle as 0's to indicate it's blocked
+    # Handle vertical arm of the cross
+    for i in range(max(center_row - arm_length, 0), min(center_row + arm_length + 1, row)):
+        grid[i][center_col] = 0
 
-if __name__ == "__main__":
-    main()
+    # Handle horizontal arm of the cross
+    for j in range(max(center_col - arm_length, 0), min(center_col + arm_length + 1, col)):
+        grid[center_row][j] = 0
+
+    down, right = eggLocation[0], eggLocation[1]
+    for i in range(arm_length):
+        for y in range(arm_length):
+            grid[int(row/2 - (right-0.5)*2 - ((right-0.5)*2)*y)][int(col/2 - (down-0.5)*2 - ((down-0.5)*2)*i)] = 0
+
+    return grid
