@@ -129,7 +129,7 @@ def a_star_search(grid, src, dest):
         col = temp_col
     path.append((row, col))
 
-    
+    print("path to node found")
     return path 
 
 def nearest_neighbor(grid, points):

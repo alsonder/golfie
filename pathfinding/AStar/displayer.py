@@ -1,7 +1,7 @@
 from PIL import Image, ImageDraw
 
 # Define cell size for visualization
-CELL_SIZE = 50
+CELL_SIZE = 1
 # Define colors for visualization
 COLOR_BLOCKED = (0, 0, 0)  # Black
 COLOR_UNBLOCKED = (255, 255, 255)  # White
