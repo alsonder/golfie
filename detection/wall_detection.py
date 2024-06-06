@@ -113,7 +113,16 @@ for cluster in np.unique(clusters):
         centroid_int = (int(centroid[0]), int(centroid[1]))  # Convert coordinates to integer
         clustered_intersections.append(centroid_int)
         # Print the coordinates of the centroid as integers
-        print("Cluster centroid (int):", centroid_int)
+        #print("Cluster centroid (int):", centroid_int)
+        #print("CC", clustered_intersections)
+
+#addit
+    def __init__(self):
+        self.clustered_intersections = []
+
+    def process_intersections(self):
+        self.clustered_intersections
+#addit
 
 # Display the results
 for pt in clustered_intersections:
