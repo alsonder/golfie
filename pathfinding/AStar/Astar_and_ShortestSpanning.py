@@ -25,6 +25,17 @@ def is_destination(row, col, dest):
 def calculate_h_value(row, col, dest):
     return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
 
+def calculate_distance_to_wall(grid, row, col):
+    ROW = len(grid)
+    COL = len(grid[0])
+    distance = float('inf')
+    for i in range(ROW):
+        for j in range(COL):
+            if grid[i][j] == 0:
+                distance = min(distance, abs(row - i) + abs(col - j))
+    return distance
+
+
 # Implement the A* search algorithm
 def a_star_search(grid, src, dest):
     ROW = len(grid)
@@ -94,7 +105,9 @@ def a_star_search(grid, src, dest):
                     # Calculate the new f, g, and h values
                     g_new = cell_details[i][j].g + 1.0
                     h_new = calculate_h_value(new_i, new_j, dest)
-                    f_new = g_new + h_new
+                    wall_distance = calculate_distance_to_wall(grid, new_i, new_j)
+                    weight = (1 + 25 / (1 + wall_distance)) 
+                    f_new = g_new + h_new + weight
 
                     # If the cell is not in the open list or the new f value is smaller
                     if cell_details[new_i][new_j].f == float('inf') or cell_details[new_i][new_j].f > f_new:
@@ -196,6 +209,15 @@ def gridCreation(row, col, arm_length, egg_location):
     # Define the new grid with all elements initialized to 1
     grid = [[1 for _ in range(col)] for _ in range(row)]
 
+    # Add obstacles around the edges of the grid
+    for i in range(row):
+        grid[i][0] = 0
+        grid[i][col-1] = 0
+
+    for j in range(col):
+        grid[0][j] = 0
+        grid[row-1][j] = 0
+
     # Calculate the center of the grid
     center_row = row // 2
     center_col = col // 2
@@ -216,5 +238,4 @@ def gridCreation(row, col, arm_length, egg_location):
                 int(col / 2 - (down - 0.5) * 2 - ((down - 0.5) * 2) * i)] = 0
 
     return grid
-
 
