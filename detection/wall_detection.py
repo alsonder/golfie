@@ -116,13 +116,13 @@ for cluster in np.unique(clusters):
         #print("Cluster centroid (int):", centroid_int)
     print("CC", clustered_intersections[:4])
 
-#addit
+#addit impo
     def __init__(self):
         self.clustered_intersections = []
 
     def process_intersections(self):
         self.clustered_intersections = clustered_intersections[:4]
-#addit
+#addit impo
 
 # Display the results
 for pt in clustered_intersections:

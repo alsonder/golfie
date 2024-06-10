@@ -111,72 +111,62 @@ def decide_goal_loc(aruco_corners, intersections):
     return [(result2),(result1)] #example return : [(x1,y1),(x2,y2)]
 
 
-'''
-import numpy as np
-import math
-
-# what class does
-''
-* finds aruco point and 4 corners of the map
-* calculates the mid points of the 4 corners to find the exits
-* calculates which point is furthest
-* returns a touple of endpoint and a point -10x of the endpoint
-''
+################### ---- VISUALISATION BELOW ---- ###################
 
 
-#impo
-def __init__(self):
-    self.intersections = []
+## INPUT VALUES
+aruco4 = [(10,20),(10,30),(20,20),(20,30)]
+corner4 = [(5,10),(5,50),(110,10),(130,99)]
+img_size = (140, 120)
 
-def set_intersections(self, intersections):
-    self.intersections = intersections
+## NCDE
 
-def print_intersections(self):
-    print("Intersections in Pane:", self.intersections)
-#impo
+goalloc = decide_goal_loc(aruco4,corner4)
+print("goal loc ",goalloc)  # Simplified to just print the result, assuming it's correctly structured
 
-def get_aruco_center(aruco_corners): #requires touple
-    aruco_centroids = []
+# Create a blank 100x100 white image
+image = Image.new("RGB", img_size, "white")
+draw = ImageDraw.Draw(image)
 
-    for corners in aruco_corners:
-        corners_array = np.array(corners)
-        centroid_x = np.mean(corners_array[:, 0, 0])
-        centroid_y = np.mean(corners_array[:, 0, 1])
-        aruco_centroids.append((centroid_x, centroid_y))
+# Define the points to draw
+points = [midpoint(*midpoint(*aruco4[0], *aruco4[1]), *midpoint(*aruco4[2], *aruco4[3])), # mid of intersec aruco
+           midpoint(*corner4[0],*corner4[1]), midpoint(*corner4[2], *corner4[3])] #* unpacks
 
-    return aruco_centroids #example return : [(x1,y1)]
+# Function to draw points
+def draw_arucorner(points):
+    for x,y in points:
+        draw.point((x,y), fill='grey')
 
-def distance(x1, y1, x2, y2):
-    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+def draw_points(points, color='red'):
+    radius = 1  
+    for x, y in points:
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
 
+def draw_aruco(points, color='blue'):
+    radius = 1
+    for x, y in points:
+        draw.ellipse((x-radius, y-radius, x+radius,y+radius), fill=color)
 
-def get_corners(intersections): #requires touple
-    return intersections[:4]
+def draw_corner_points(points, color='grey'):
+    radius = 1  
+    for x, y in points:
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
+        
+def draw_goal(points, color='green'):
+    radius = 2  
+    for x, y in points:
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=color)
 
-def midpoint(x1, y1, x2, y2):
-    return ((x1 + x2) / 2, (y1 + y2) / 2)
+# Define special coordinates that need to be colored differently
 
-def decide_goal_loc(aruco_corners, intersections):
-    aruX, aruY = get_aruco_center(aruco_corners)
+draw_arucorner(aruco4)
+draw_points(points, 'red')
+draw_aruco(points[:1])
+draw_corner_points(corner4)
+draw_goal(goalloc)
 
-    # Calculate midpoints between x1x2, y1y2 and x3x4, y3y4
-    corners = get_corners(intersections)
-    midpoint1 = midpoint(corners[0][0], corners[0][1], corners[1][0], corners[1][1])
-    midpoint2 = midpoint(corners[2][0], corners[2][1], corners[3][0], corners[3][1])
-    
-    # Calculate distances from the aruco mark
-    distance1 = distance(aruX, aruY, *midpoint1)
-    distance2 = distance(aruX, aruY, *midpoint2)
+# Save the image
+image.save('points_visualization.png')
 
-    if distance1 > distance2:
-        result = midpoint1
-    else:
-        result = midpoint2
-
-    result1 = [(x - 10, y) for (x, y) in result]
-    #x2, y2 = get_corners[:2]
-    #x3, y3 = get_corners[2:4]
-    print("built final coordinates to exit ", )
-
-    return [result] #example return : [(x1,y1),(x2,y2)]
-'''
+# Show the image
+image.show()
