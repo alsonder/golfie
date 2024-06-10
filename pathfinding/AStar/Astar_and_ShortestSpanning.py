@@ -22,8 +22,12 @@ def is_destination(row, col, dest):
     return row == dest[0] and col == dest[1]
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
-def calculate_h_value(row, col, dest):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
+def calculate_h_value(row, col, dest, ROW, COL):
+    distance_to_dest = ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
+    wall_proximity_penalty = min(row, ROW - row - 1, col, COL - col - 1)
+    
+    return distance_to_dest + ((ROW + COL - wall_proximity_penalty) / (ROW + COL))
+
 
 # Implement the A* search algorithm
 def a_star_search(grid, src, dest):
@@ -93,7 +97,7 @@ def a_star_search(grid, src, dest):
                 else:
                     # Calculate the new f, g, and h values
                     g_new = cell_details[i][j].g + 1.0
-                    h_new = calculate_h_value(new_i, new_j, dest)
+                    h_new = calculate_h_value(new_i, new_j, dest, ROW, COL)
                     f_new = g_new + h_new
 
                     # If the cell is not in the open list or the new f value is smaller
@@ -190,7 +194,6 @@ def nearest_neighbor_simplified(points):
     visit_order.append(end)
     
     return visit_order
-
 
 def gridCreation(row, col, arm_length, egg_location):
     # Define the new grid with all elements initialized to 1
