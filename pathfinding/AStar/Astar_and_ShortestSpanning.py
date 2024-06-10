@@ -22,12 +22,8 @@ def is_destination(row, col, dest):
     return row == dest[0] and col == dest[1]
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
-def calculate_h_value(row, col, dest, ROW, COL):
-    distance_to_dest = ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
-    wall_proximity_penalty = min(row, ROW - row - 1, col, COL - col - 1)
-    
-    return distance_to_dest + ((ROW + COL - wall_proximity_penalty) / (ROW + COL))
-
+def calculate_h_value(row, col, dest):
+    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
 
 def calculate_distance_to_wall(grid, row, col):
     ROW = len(grid)
@@ -208,6 +204,7 @@ def nearest_neighbor_simplified(points):
     
     return visit_order
 
+
 def gridCreation(row, col, arm_length, egg_location):
     # Define the new grid with all elements initialized to 1
     grid = [[1 for _ in range(col)] for _ in range(row)]
@@ -241,4 +238,3 @@ def gridCreation(row, col, arm_length, egg_location):
                 int(col / 2 - (down - 0.5) * 2 - ((down - 0.5) * 2) * i)] = 0
 
     return grid
-
