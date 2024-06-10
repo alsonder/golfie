@@ -3,12 +3,11 @@ import heapq
 # Define the Cell class
 class Cell:
     def __init__(self):
-        self.parent_i = 0 # Parent cell's row index
-        self.parent_j = 0 # Parent cell's column index
-        self.f = float('inf') # Total cost of the cell (g + h)
-        self.g = float('inf') # Cost from start to this cell
-        self.h = 0 # Heuristic cost from this cell to destination
-
+        self.parent_i = 0  # Parent cell's row index
+        self.parent_j = 0  # Parent cell's column index
+        self.f = float('inf')  # Total cost of the cell (g + h)
+        self.g = float('inf')  # Cost from start to this cell
+        self.h = 0  # Heuristic cost from this cell to destination
 
 def is_valid(row, col, ROW, COL):
     return (row >= 0) and (row < ROW) and (col >= 0) and (col < COL)
@@ -22,15 +21,46 @@ def is_destination(row, col, dest):
     return row == dest[0] and col == dest[1]
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
-def calculate_h_value(row, col, dest):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
+def calculate_h_value(row, col, dest, distance_to_wall):
+    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (50 / (1 + distance_to_wall))
 
-# Implement the A* search algorithm
-# this function returns the most optimal path from a to b, where the grid is an array of tubles, src and dest is also a tuble of coordinates
-# the output is an array of tuples for each coordinate visited in the proper order as the path
-def a_star_search(grid, src, dest):
+from collections import deque
+
+def calculate_distance_to_wall(grid):
     ROW = len(grid)
     COL = len(grid[0])
+    distance_to_wall = [[float('inf') for _ in range(COL)] for _ in range(ROW)]
+    queue = deque()
+
+    # Initialize the queue with all wall cells and set their distance to 0
+    for i in range(ROW):
+        for j in range(COL):
+            if grid[i][j] == 0:
+                distance_to_wall[i][j] = 0
+                queue.append((i, j))
+
+    # Perform BFS from all wall cells
+    while queue:
+        i, j = queue.popleft()
+        current_distance = distance_to_wall[i][j]
+
+        # Explore all 8 possible directions
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+        for dir in directions:
+            new_i = i + dir[0]
+            new_j = j + dir[1]
+
+            if is_valid(new_i, new_j, ROW, COL) and distance_to_wall[new_i][new_j] > current_distance + 1:
+                distance_to_wall[new_i][new_j] = current_distance + 1
+                queue.append((new_i, new_j))
+    print("Weights added to grid")
+    return distance_to_wall
+
+# Implement the A* search algorithm
+def a_star_search(grid, src, dest, distance_to_wall):
+    ROW = len(grid)
+    COL = len(grid[0])
+
     # Check if the source and destination are valid
     if not is_valid(src[0], src[1], ROW, COL) or not is_valid(dest[0], dest[1], ROW, COL):
         print("Source or destination is invalid")
@@ -95,7 +125,7 @@ def a_star_search(grid, src, dest):
                 else:
                     # Calculate the new f, g, and h values
                     g_new = cell_details[i][j].g + 1.0
-                    h_new = calculate_h_value(new_i, new_j, dest)
+                    h_new = calculate_h_value(new_i, new_j, dest, distance_to_wall[new_i][new_j])
                     f_new = g_new + h_new
 
                     # If the cell is not in the open list or the new f value is smaller
@@ -128,38 +158,86 @@ def a_star_search(grid, src, dest):
         row = temp_row
         col = temp_col
     path.append((row, col))
+    path.reverse()  # Reverse the path to start from the source
 
-    print("path to node found")
-    return path 
+    print("Path to node found")
+    return path
 
 def nearest_neighbor(grid, points):
-    start = points[-1]  # Start from what is initially considered the end
-    other_points = points[:-1]
-    
+
+    def calculate_h_value(y1, x1, point):
+        y2, x2 = point
+        return abs(y1 - y2) + abs(x1 - x2)
+
+    start = points[0]  # Start from the first point
+    end = points[-1]   # Ensure ending at the last point
+    other_points = points[1:-1]  # Points in between
+
     path = []
     unvisited = set(other_points)
     current_point = start
     visit_order = [current_point]
+    distance_to_wall = calculate_distance_to_wall(grid)
 
     # Travel to the nearest unvisited point each time
     while unvisited:
         next_point = min(unvisited, key=lambda x: calculate_h_value(current_point[1], current_point[0], x))
-        path.extend(a_star_search(grid, current_point, next_point)[:-1])  # path without repeating last node
+        segment_path = a_star_search(grid, current_point, next_point, distance_to_wall)
+        if segment_path is None:
+            print("Failed to find path to", next_point)
+            return None
+        path.extend(segment_path[:-1])  # path without repeating last node
         current_point = next_point
         visit_order.append(current_point)
         unvisited.remove(current_point)
-
-    # Reverse the path and visit order to simulate starting at any point and ending at the specified end point
-    path.reverse()  # Reverse the complete path
-    visit_order.reverse()  # Reverse the order of visits
+    
+    # Finally, move from the last visited point to the end point
+    final_segment = a_star_search(grid, current_point, end, distance_to_wall)
+    if final_segment is None:
+        print("Failed to find path to", end)
+        return None
+    path.extend(final_segment)
+    visit_order.append(end)
     
     return path, visit_order
 
+def nearest_neighbor_simplified(points):
+    def calculate_distance(point1, point2):
+        return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
-def gridCreation(row, col, arm_length, eggLocation):
+    start = points[0]  # Start from the first point
+    end = points[-1]   # Ensure ending at the last point
+    other_points = points[1:-1]  # Points in between
 
+    visit_order = [start]
+    unvisited = set(other_points)
+    current_point = start
+
+    # Travel to the nearest unvisited point each time
+    while unvisited:
+        next_point = min(unvisited, key=lambda x: calculate_distance(current_point, x))
+        visit_order.append(next_point)
+        current_point = next_point
+        unvisited.remove(next_point)
+
+    # Finally, add the end point
+    visit_order.append(end)
+    
+    return visit_order
+
+
+def gridCreation(row, col, arm_length, egg_location):
     # Define the new grid with all elements initialized to 1
     grid = [[1 for _ in range(col)] for _ in range(row)]
+
+    # Add obstacles around the edges of the grid
+    for i in range(row):
+        grid[i][0] = 0
+        grid[i][col-1] = 0
+
+    for j in range(col):
+        grid[0][j] = 0
+        grid[row-1][j] = 0
 
     # Calculate the center of the grid
     center_row = row // 2
@@ -174,9 +252,10 @@ def gridCreation(row, col, arm_length, eggLocation):
     for j in range(max(center_col - arm_length, 0), min(center_col + arm_length + 1, col)):
         grid[center_row][j] = 0
 
-    down, right = eggLocation[0], eggLocation[1]
+    down, right = egg_location[0], egg_location[1]
     for i in range(arm_length):
         for y in range(arm_length):
-            grid[int(row/2 - (right-0.5)*2 - ((right-0.5)*2)*y)][int(col/2 - (down-0.5)*2 - ((down-0.5)*2)*i)] = 0
+            grid[int(row / 2 - (right - 0.5) * 2 - ((right - 0.5) * 2) * y)][
+                int(col / 2 - (down - 0.5) * 2 - ((down - 0.5) * 2) * i)] = 0
 
     return grid
