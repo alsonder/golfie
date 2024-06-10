@@ -43,9 +43,11 @@ detected_balls = detect_egg(frame)
 # Draw circles on the image to represent detected balls
 if detected_balls:
     for ball in detected_balls:
+        for i in range(360):
+            X = ball[0] + (20 * np.cos(360/(i+1)))  
+            Y = ball[1] + (20 * np.sin(360/(i+1)))
+            cv2.circle(frame, (int(X), int(Y)), 1, (0, 255, 0), -1)
         
-        cv2.circle(frame, (ball[0], ball[1]), 25, (0, 255, 0), -1)
-
 # Convert the OpenCV image to PIL image
 pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
@@ -58,3 +60,9 @@ pil_image.show()
 
 # Print the path of the saved image
 # print("Modified image with detected balls saved to:", output_image_path)
+
+
+# Convert the OpenCV image to PIL image
+pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+

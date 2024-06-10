@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
+import pathfinding
 
-"""This function detects all circles using houghcircles, it outputs the coordinates in pixels and sends it to the confirm balls, 
-    for insertion in the list, this also detects loose balls in the wild, if there is a ball being pushed, it notices
-    and sends it to confirmation"""
+"""This function will detect a circle on the thick part of the egg. Then calculate points on a circle periphery,
+that encapsulates the egg.The standard amount of points found is 360. 
+The function then returns a numpy array with touples containing coordinates. Example: [(150,300),(145,315)]"""
 
 
 def detect_egg(frame, mtx, dist):
@@ -30,14 +31,21 @@ def detect_egg(frame, mtx, dist):
     circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 1,
                                param1=param1, param2=param2,
                                minRadius=min_radius, maxRadius=max_radius)
-    ball_list = []
+    egg_list = []
     if circles is not None:
         circles = np.uint16(np.around(circles))
         for i in circles[0, :]:
-            ball_list.append([i[0], i[1]])
+            egg_list.append([i[0], i[1]])
 
+    egg_circle = []
+    for ball in egg_list:
+        for i in range(360):
+            X = ball[0] + (20 * np.cos(360/(i+1)))  
+            Y = ball[1] + (20 * np.sin(360/(i+1)))
+            egg_circle.append([i[X],i[Y]])
 
-    return ball_list  # Returns only the list of detected balls without confirmation status (list of unfirm balls)
+    return egg_circle  # Returns only the list of detected balls without confirmation status (list of unfirm balls)
+
 
 
 
