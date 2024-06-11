@@ -63,7 +63,8 @@ def main():
         if aruco_ids is not None and aruco_corners:
             # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
-                frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
+                pass
+                #frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
         
         detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
         current_time = time.time() 
@@ -82,7 +83,7 @@ def main():
             frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
             
         if closest_ball is not None: # hybrid a* implementation here 
-            navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point)
+            #navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point)
             total_balls -= 1
             
             if total_balls == 0:
