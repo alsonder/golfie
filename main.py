@@ -30,17 +30,19 @@ def main():
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
 #   ble_client = BLEClient(ESP32_ADDRESS)
 #   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
-    starter_cap = cv2.VideoCapture(0)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
     ret, starter_frame = starter_cap.read()
+    cv2.imwrite('starter_image.png', starter_frame)
+
 
     #global functions
-    aruco_location = detect_aruco(starter_cap)
-    find_cross = find_and_draw_red_cross(starter_cap)
-    egg_loc = detect_egg(starter_cap)
-    wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_cap)
+    aruco_location = detect_aruco(starter_frame)
+    find_cross = find_and_draw_red_cross(starter_frame)
+    egg_loc = detect_egg(starter_frame)
+    wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
     goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
     starter_cap.release()

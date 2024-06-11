@@ -86,9 +86,11 @@ def get_line_pixels_and_corners(frame):
             if cluster != -1:  # Ignore noise points
                 points_in_cluster = np.array(intersections)[clusters == cluster]
                 centroid = points_in_cluster.mean(axis=0)
-                clustered_intersections.append(centroid)
+                # Convert centroid to a tuple of integers
+                clustered_intersections.append(tuple(map(int, centroid)))
 
-    print("Wall Detection and Corner Identification Successful")
+    print("Wall Detection Successful")
+    print("Corner Identification Successful")
     return all_line_pixels, clustered_intersections
 
 def line_intersection(line1, line2):
