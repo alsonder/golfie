@@ -42,7 +42,7 @@ def detect_egg(frame, mtx, dist):
         for i in range(360):
             X = ball[0] + (20 * np.cos(360/(i+1)))  
             Y = ball[1] + (20 * np.sin(360/(i+1)))
-            egg_circle.append([i[X],i[Y]])
+            egg_circle.append([X,Y])
 
     return egg_circle  # Returns the 360points created just above
 
