@@ -34,7 +34,7 @@ def detect_egg(frame):
     return ball_list  # Returns only the list of detected balls without confirmation status (list of unfirm balls)
 
 # Load the image
-image_path = "images_w_egg/image_45.png"
+image_path = "images_w_egg/image_20.png"
 frame = cv2.imread(image_path)
 
 # Detect balls

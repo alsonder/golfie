@@ -3,7 +3,7 @@ import numpy as np
 import pathfinding
 
 """This function will detect a circle on the thick part of the egg. Then calculate points on a circle periphery,
-that encapsulates the egg.The standard amount of points found is 360. 
+that encapsulates the egg.The standard amount of points made is 360, because it increments 1 degree / point.
 The function then returns a numpy array with touples containing coordinates. Example: [(150,300),(145,315)]"""
 
 
@@ -44,7 +44,7 @@ def detect_egg(frame, mtx, dist):
             Y = ball[1] + (20 * np.sin(360/(i+1)))
             egg_circle.append([i[X],i[Y]])
 
-    return egg_circle  # Returns only the list of detected balls without confirmation status (list of unfirm balls)
+    return egg_circle  # Returns the 360points created just above
 
 
 
