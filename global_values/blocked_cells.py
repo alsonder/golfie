@@ -17,11 +17,10 @@ def generate_blocked_cells():
     frame = cv2.imread(image_path)
     blocked_cells_list = []
 
-    return blocked_cells_list.append(
-        get_line_pixels_from_image(frame),
-        find_and_draw_red_cross(frame),
-        detect_egg,
-        decide_goal_loc)
+    blocked_cells_list.append(get_line_pixels_from_image(frame))
+    blocked_cells_list.append(find_and_draw_red_cross(frame))
+    blocked_cells_list.append(detect_egg(frame))
 
+    return blocked_cells_list
 
 print(generate_blocked_cells())
