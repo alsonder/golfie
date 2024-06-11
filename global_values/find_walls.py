@@ -1,14 +1,15 @@
 import cv2
 import numpy as np
+from sklearn.cluster import DBSCAN
 
-def get_line_pixels_from_image(frame):
+def get_line_pixels_and_corners(frame):
     # Load the image
     img = frame
 
     # Check if the image is loaded
     if img is None:
-        print("Image not loaded. Check the file path.")
-        return []
+        print("Image not loaded. Check the frame.")
+        return [], []
 
     # Define the color range for red
     lower_red = np.array([0, 0, 100])
@@ -67,12 +68,46 @@ def get_line_pixels_from_image(frame):
             pixels = get_line_pixels(x1, y1, x2, y2)
             all_line_pixels.extend(pixels)
 
-    print("Wall Detection Successful")
-    return all_line_pixels
+    # Find intersections
+    intersections = []
+    if lines is not None:
+        for i in range(len(lines)):
+            for j in range(i + 1, len(lines)):
+                pt = line_intersection(lines[i], lines[j])
+                if pt and is_within_bounds(pt, lines[i][0]) and is_within_bounds(pt, lines[j][0]):
+                    intersections.append(pt)
+
+    # Apply DBSCAN clustering to intersections
+    clustered_intersections = []
+    if intersections:
+        dbscan = DBSCAN(eps=10, min_samples=2)
+        clusters = dbscan.fit_predict(np.array(intersections))
+        for cluster in np.unique(clusters):
+            if cluster != -1:  # Ignore noise points
+                points_in_cluster = np.array(intersections)[clusters == cluster]
+                centroid = points_in_cluster.mean(axis=0)
+                clustered_intersections.append(centroid)
+
+    print("Wall Detection and Corner Identification Successful")
+    return all_line_pixels, clustered_intersections
+
+def line_intersection(line1, line2):
+    x1, y1, x2, y2 = line1[0]
+    x3, y3, x4, y4 = line2[0]
+    denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+    if denominator == 0:
+        return None  # Lines are parallel, no intersection
+    px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denominator
+    py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denominator
+    return (px, py)
+
+def is_within_bounds(pt, line):
+    x, y = pt
+    x1, y1, x2, y2 = line
+    return min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2)
 
 # Example usage
-'''
-image_path = 'global_values/test_image.png'
 image = cv2.imread('global_values/test_image.png')
-line_pixels = get_line_pixels_from_image(image)
-print(line_pixels)'''
+line_pixels, corners = get_line_pixels_and_corners(image)
+print("Line Pixels:", line_pixels)
+print("Corners:", corners)
