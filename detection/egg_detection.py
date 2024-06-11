@@ -17,7 +17,7 @@ def detect_egg(frame, mtx, dist):
     # Change below according to the best setting found during calibrate_and_detect_balls()
     lower_hsv = np.array([0, 0, 0])
     upper_hsv = np.array([179, 255, 255])
-    gaussian_blur = 6
+    gaussian_blur = 1
     param1 = 50
     param2 = 12
     min_radius = 13
