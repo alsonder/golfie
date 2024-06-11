@@ -67,7 +67,12 @@ def get_line_pixels_from_image(frame):
             pixels = get_line_pixels(x1, y1, x2, y2)
             all_line_pixels.extend(pixels)
 
-    print("Wall Detection Successful")
+
+    if all_line_pixels == None:
+        print("No Walls Found")
+    else:
+        print("Wall Detection Successful")   
+        
     return all_line_pixels
 
 # Example usage

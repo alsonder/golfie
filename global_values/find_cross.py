@@ -48,7 +48,13 @@ def find_and_draw_red_cross(image):
     '''
     # Extract and return coordinates
     coordinates = [(point[0][0], point[0][1]) for point in cross_contour]
-    print("Cross Detection Successful")
+
+    if coordinates == None:
+        print("Cross Not Found")
+    else:
+        print("Cross Detection Successful")    
+
+
     return coordinates
 
 # Example usage
