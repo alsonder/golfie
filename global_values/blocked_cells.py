@@ -1,5 +1,10 @@
 import cv2
 import numpy as np
+from find_goal import decide_goal_loc
+from find_aruco import detect_aruco
+from find_cross import find_and_draw_red_cross
+from find_egg import detect_egg
+from find_walls import get_line_pixels_from_image
 
 
 """ This module is simply supposed to gather all the information from the rest of the globel values
@@ -12,6 +17,11 @@ def generate_blocked_cells():
     frame = cv2.imread(image_path)
     blocked_cells_list = []
 
-    #Call all the functions and add to the list
-    
+    return blocked_cells_list.append(
+        get_line_pixels_from_image(frame),
+        find_and_draw_red_cross(frame),
+        detect_egg,
+        decide_goal_loc)
 
+
+print(generate_blocked_cells())
