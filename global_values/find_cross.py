@@ -37,7 +37,7 @@ def find_and_draw_red_cross(image):
 
     if cross_contour is None:
         raise ValueError("Cross not found in the image")
-
+    '''
     # Step 7: Draw the contour on the image
     cv2.drawContours(image, [cross_contour], -1, (0, 255, 0), 2)
 
@@ -45,13 +45,14 @@ def find_and_draw_red_cross(image):
     cv2.imshow('Image with Cross Outline', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
+    '''
     # Extract and return coordinates
     coordinates = [(point[0][0], point[0][1]) for point in cross_contour]
+    print("Cross Detection Successful")
     return coordinates
 
 # Example usage
-image_path = "global_values/test_image.png"
+'''image_path = "global_values/test_image.png"
 image = cv2.imread(image_path)
 cross_coordinates = find_and_draw_red_cross(image)
-print("Cross coordinates:", cross_coordinates)
+print("Cross coordinates:", cross_coordinates)'''

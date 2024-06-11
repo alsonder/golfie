@@ -39,27 +39,28 @@ def detect_egg(frame):
     egg_circle = []
     for egg in egg_list:
         for i in range(360):
-            X = egg[0] + (20 * np.cos(360/(i+1)))  
-            Y = egg[1] + (20 * np.sin(360/(i+1)))
+            X = int(egg[0] + (20 * np.cos(360/(i+1))))
+            Y = int(egg[1] + (20 * np.sin(360/(i+1))))
             egg_circle.append([X,Y])
             cv2.circle(frame, (int(X), int(Y)), 1, (0, 255, 0), -1)
             
-    print(len(egg_circle))        
+    #print(len(egg_circle)) 
+    print("Egg Detection Successful")       
     return egg_circle  # Returns the 360points created just above
 
 # Load the image
-image_path = "global_values/test_image.png"
-frame = cv2.imread(image_path)
+#image_path = "global_values/test_image.png"
+#frame = cv2.imread(image_path)
 
 # Detect balls
-detected_egg = detect_egg(frame)
+#detected_egg = detect_egg(frame)
             
         
 # Convert the OpenCV image to PIL image
-pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+#pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
 # Display the PIL image
-pil_image.show()
+#pil_image.show()
 
 
 
