@@ -8,6 +8,11 @@ from find_egg import detect_egg
 from find_walls import get_line_pixels_and_corners
 ## - imports for main - ##
 
+#import pathfinding
+from create_path import nearest_neighbor, a_star_search
+from create_grid import gridCreation
+from display_grid import visualize_grid
+
 image = cv2.imread('global_values/test_image.png')
 
 # Check if the image has been correctly loaded
@@ -25,6 +30,19 @@ wall_corner_locations, line_pixels = get_line_pixels_and_corners(image)
 
 goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
+from fill_cross import fill_polygon
+
+#if we do not use contours we can use this. which is pretty scuffed but works better if contours still has spaces.
+#filled_polygon_points = fill_polygon(find_cross)
+
+
+ROW, COL = 480,640
+grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
+
+goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
+
+aruco = (aruco_location[1],aruco_location[0])
+path = a_star_search(grid, aruco, goal, weightedGrid)
 
 print("\n - - - Some values are - - -")
 print("aruco_loc = ", aruco_location)
@@ -32,6 +50,6 @@ print("find_cross = ",find_cross[:4]) #4 first values of findcross
 print("egg_loc = ", egg_loc[:4]) #4 first values of egg
 print("line_pixels = ", line_pixels[:4]) #4 first values of wall
 print("goal_loc = ", goal_location)
-
+visualize_grid(grid, aruco, [aruco,goal], path)
 
 # alle blocked cells ligger i "blocked_cells"
