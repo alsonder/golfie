@@ -44,8 +44,13 @@ def detect_egg(frame):
             egg_circle.append((X,Y))
             cv2.circle(frame, (int(X), int(Y)), 1, (0, 255, 0), -1)
             
-    #print(len(egg_circle)) 
-    print("Egg Detection Successful")       
+    
+    if egg_circle == None:
+        print("Egg not found")
+    else:
+        print("Egg Detection Successful")       
+
+
     return egg_circle  # Returns the 360points created just above
 
 # Load the image
