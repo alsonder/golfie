@@ -11,18 +11,27 @@ def detect_aruco(frame):
     parameters = aruco.DetectorParameters()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
     if ids is not None:
-        aruco.drawDetectedMarkers(frame, corners, ids)
-        print(*corners[0])
-        midpoint_aruco = midpoint(midpoint(*corners[0],*corners[1]), midpoint(*corners[2],corners[3]))
-    return midpoint_aruco
-
+        #aruco.drawDetectedMarkers(frame, corners, ids)
+        #print(*corners[0])
+        midpoint_aruco = midpoint(
+            *midpoint(*corners[0][0][0], *corners[0][0][1]),
+            *midpoint(*corners[0][0][2], *corners[0][0][3])
+        )    
+        print("Aruco Detection Successful")
+        return midpoint_aruco
+'''
 def detect_aruco_test(frame):
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
     parameters = aruco.DetectorParameters()
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)
     if ids is not None:
+        midpoint_aruco = midpoint(
+            *midpoint(*corners[0][0][0], *corners[0][0][1]),
+            *midpoint(*corners[0][0][2], *corners[0][0][3])
+                )
+        
         aruco.drawDetectedMarkers(frame, corners, ids)
-        print(*corners[0])
+        print(midpoint_aruco)
     return corners, ids, frame
 
 # Example usage
@@ -35,3 +44,4 @@ else:
     plt.imshow(cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB))
     plt.title('Detected ArUco markers')
     plt.show()
+'''

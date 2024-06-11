@@ -93,8 +93,8 @@ def decide_goal_loc(aruco_coor, intersections):
     result2 = midpoint(*result1, *result2)
     result2 = midpoint(*result1, *result2)
     
-    print("result1: {}, result2: {}".format(result2, result1))
-
+    #print("result1: {}, result2: {}".format(result2, result1))
+    print("Goal Detection Successful")
 
     return [(result2),(result1)] #example return : [(x1,y1),(x2,y2)]
 
