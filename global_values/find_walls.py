@@ -3,7 +3,7 @@ import numpy as np
 
 def get_line_pixels_from_image(frame):
     # Load the image
-    img = cv2.imread(frame)
+    img = frame
 
     # Check if the image is loaded
     if img is None:
@@ -67,9 +67,12 @@ def get_line_pixels_from_image(frame):
             pixels = get_line_pixels(x1, y1, x2, y2)
             all_line_pixels.extend(pixels)
 
+    print("Wall Detection Successful")
     return all_line_pixels
 
 # Example usage
+'''
 image_path = 'global_values/test_image.png'
-line_pixels = get_line_pixels_from_image(image_path)
-print(line_pixels)
+image = cv2.imread('global_values/test_image.png')
+line_pixels = get_line_pixels_from_image(image)
+print(line_pixels)'''
