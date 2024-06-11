@@ -4,7 +4,7 @@ from find_goal import decide_goal_loc
 from find_aruco import detect_aruco
 from find_cross import find_and_draw_red_cross
 from find_egg import detect_egg
-from find_walls import get_line_pixels_from_image
+from find_walls import get_line_pixels_and_corners
 ## - imports for main - ##
 def get_map_values(image):
     # Check if the image has been correctly loaded
@@ -17,7 +17,7 @@ def get_map_values(image):
     aruco_location = detect_aruco(image)
     find_cross = find_and_draw_red_cross(image)
     egg_loc = detect_egg(image)
-    line_pixels = get_line_pixels_from_image(image)
+    line_pixels = get_line_pixels_and_corners(image)
     goal_location = decide_goal_loc(aruco_location,filler_wall_corners)
 
 

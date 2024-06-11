@@ -1,5 +1,6 @@
 import cv2
 import time
+import sys
 from livestream import livestream
 from calibration import camera_calibration
 from detection import aruco_detection
@@ -10,12 +11,19 @@ from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
 #from connection.bluetooth import start_ble_client_thread, BLEClient
+###
+from global_values.find_goal import decide_goal_loc
+from global_values.find_aruco import detect_aruco
+from global_values.find_cross import find_and_draw_red_cross
+from global_values.find_egg import detect_egg
+from global_values.find_walls import get_line_pixels_and_corners
+###
 from calibration.robotmotor_calibration import calibrate_robot_movement
 from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
 import os
 from robotposition.navigation import navigate_to_ball
 
-from global_values import all_values
+#from global_values import all_values
 
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
@@ -27,10 +35,23 @@ def main():
         print("Cannot open camera")
         return None
     ret, starter_frame = starter_cap.read()
+
+    #global functions
+    aruco_location = detect_aruco(starter_cap)
+    find_cross = find_and_draw_red_cross(starter_cap)
+    egg_loc = detect_egg(starter_cap)
+    wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_cap)
+    goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
+
     starter_cap.release()
 
-    all_values(starter_frame) # ;)
 
+    print("\n - - - Some values are - - -")
+    print("aruco_loc = ", aruco_location)
+    print("find_cross = ",find_cross[:4]) #4 first values of findcross
+    print("egg_loc = ", egg_loc[:4]) #4 first values of egg
+    print("line_pixels = ", line_pixels[:4]) #4 first values of wall
+    print("goal_loc = ", goal_location)
 
     stream = livestream.LiveStream()
     mtx, dist = None, None   

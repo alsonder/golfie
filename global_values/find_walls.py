@@ -107,7 +107,7 @@ def is_within_bounds(pt, line):
     return min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2)
 
 # Example usage
-image = cv2.imread('global_values/test_image.png')
-line_pixels, corners = get_line_pixels_and_corners(image)
-print("Line Pixels:", line_pixels)
-print("Corners:", corners)
+#image = cv2.imread('global_values/test_image.png')
+#line_pixels, corners = get_line_pixels_and_corners(image)
+#print("Line Pixels:", line_pixels)
+#print("Corners:", corners)
