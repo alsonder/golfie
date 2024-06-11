@@ -15,12 +15,22 @@ from calibration.cam_calibrationV2 import collect_calibration_images, load_calib
 import os
 from robotposition.navigation import navigate_to_ball
 
+from global_values import all_values
 
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
 #   ble_client = BLEClient(ESP32_ADDRESS)
 #   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
+    starter_cap = cv2.VideoCapture(0)
+    if not starter_cap.isOpened():
+        print("Cannot open camera")
+        return None
+    ret, starter_frame = starter_cap.read()
+    starter_cap.release()
+
+    all_values(starter_frame) # ;)
+
 
     stream = livestream.LiveStream()
     mtx, dist = None, None   

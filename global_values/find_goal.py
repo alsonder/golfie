@@ -74,6 +74,9 @@ def decide_goal_loc(aruco_coor, intersections):
     if (distance(*start_mid_corner2, *intersections[3]) < dist_corner2 and distance(*start_mid_corner2, *intersections[3])!=0):
         dist_corner2 = distance(*start_mid_corner2, *intersections[3])
         mid_corner2 = midpoint(*start_mid_corner2, *intersections[3])
+    if (distance(*start_mid_corner2, *intersections[1]) < dist_corner2 and distance(*start_mid_corner2, *intersections[3])!=0):
+        dist_corner2 = distance(*start_mid_corner2, *intersections[1])
+        mid_corner2 = midpoint(*start_mid_corner2, *intersections[1])
     
 
     corner1 =  mid_corner1
