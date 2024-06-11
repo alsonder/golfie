@@ -225,6 +225,12 @@ def nearest_neighbor_simplified(points):
     
     return visit_order
 
+def add_point_to_grid(grid, arr_of_points):
+    for point in arr_of_points:
+        x, y = point
+        grid[x][y] = 0  # Assuming 1 represents a wall
+    calculate_distance_to_wall(grid)
+
 
 def gridCreation(row, col, arm_length, egg_location):
     # Define the new grid with all elements initialized to 1

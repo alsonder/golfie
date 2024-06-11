@@ -1,10 +1,9 @@
-from Astar_and_ShortestSpanning import nearest_neighbor, nearest_neighbor_simplified, gridCreation
+from Astar_and_ShortestSpanning import nearest_neighbor, nearest_neighbor_simplified, gridCreation, add_point_to_grid
 from displayer import visualize_grid
 
            # 1        2        3        4       5       6        7       8     9        10         11
-points = [(10, 10), (90,90),(20,30),(30,20),(40,40),(90,70),(70,90),(90,10), (10,90),  (49,51), (98,98)]
-
-#points = [(10,10), (20,20)]
+#points = [(10, 10), (90,90),(20,30),(30,20),(40,40),(90,70),(70,90),(90,10), (10,90),  (49,51), (98,98)]
+points = [(10,10),(98,20),(96,50), (98,50)]
 
 ROW, COL = 100,100
 
@@ -17,6 +16,8 @@ grid = gridCreation(ROW, COL, 20, (down,right))
 print("grid created")
 #print("ROW: ",len(grid))
 #print("COL: ",len(grid[0]))
+
+add_point_to_grid(grid, ([(11, 10), (10, 11), (11, 11), (11,9), (10,9)]))
 
 nn_path, nn_order = nearest_neighbor(grid,points)
 #simple_order = nearest_neighbor_simplified(points)
