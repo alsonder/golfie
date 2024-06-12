@@ -59,7 +59,7 @@ def find_and_draw_red_cross(image):
     if not coordinates:
         print("Cross Not Found")
     else:
-        print("Cross Detection Successful")
+        print("Cross Detection         | Successful")
     # Extract and return coordinates
     return coordinates
 

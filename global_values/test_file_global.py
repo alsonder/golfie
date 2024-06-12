@@ -6,13 +6,13 @@ from find_aruco import detect_aruco
 from find_cross import find_and_draw_red_cross
 from find_egg import detect_egg
 from find_walls import get_line_pixels_and_corners
-from fill_cross import fill_polygon
+#from fill_cross import fill_polygon
 from create_path import nearest_neighbor, a_star_search
 from create_grid import gridCreation
 from display_grid import visualize_grid
 
 image = cv2.imread('global_values/test_image.png')
-#image = cv2.flip(image, 0)
+#image = cv2.flip(image, 1)
 ROW, COL = image.shape[:2]  # image.shape returns (height, width, channels)
 
 # Check if the image has been correctly loaded

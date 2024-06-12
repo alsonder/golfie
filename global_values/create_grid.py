@@ -1,4 +1,4 @@
-from create_path import calculate_distance_to_wall
+from .create_path import calculate_distance_to_wall
 
 def gridCreation(row, col, obstacles):
         # Define the new grid with all elements initialized to 1 (open field)
