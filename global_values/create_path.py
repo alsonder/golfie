@@ -163,7 +163,7 @@ def a_star_search(grid, src, dest, distance_to_wall):
     print("Path To Node Found      | Successful")
     return path
 
-def nearest_neighbor(grid, points):
+def nearest_neighbor(grid, points, distance_to_wall=0):
 
     def calculate_h_value(y1, x1, point):
         y2, x2 = point
@@ -177,7 +177,8 @@ def nearest_neighbor(grid, points):
     unvisited = set(other_points)
     current_point = start
     visit_order = [current_point]
-    distance_to_wall = calculate_distance_to_wall(grid)
+    if(distance_to_wall==0):
+        distance_to_wall = calculate_distance_to_wall(grid)
 
     # Travel to the nearest unvisited point each time
     while unvisited:
@@ -200,3 +201,27 @@ def nearest_neighbor(grid, points):
     visit_order.append(end)
     
     return path, visit_order
+
+def nearest_neighbor_simplified(points):
+    def calculate_distance(point1, point2):
+        return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
+
+    start = points[0]  # Start from the first point
+    end = points[-1]   # Ensure ending at the last point
+    other_points = points[1:-1]  # Points in between
+
+    visit_order = [start]
+    unvisited = set(other_points)
+    current_point = start
+
+    # Travel to the nearest unvisited point each time
+    while unvisited:
+        next_point = min(unvisited, key=lambda x: calculate_distance(current_point, x))
+        visit_order.append(next_point)
+        current_point = next_point
+        unvisited.remove(next_point)
+
+    # Finally, add the end point
+    visit_order.append(end)
+
+    return visit_order

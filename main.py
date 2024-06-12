@@ -17,7 +17,7 @@ from global_values.find_aruco import detect_aruco
 from global_values.find_cross import find_and_draw_red_cross
 from global_values.find_egg import detect_egg
 from global_values.find_walls import get_line_pixels_and_corners
-from global_values.create_path import nearest_neighbor, a_star_search
+from global_values.create_path import nearest_neighbor, a_star_search, nearest_neighbor_simplified
 from global_values.create_grid import gridCreation
 from global_values.display_grid import visualize_grid
 from global_values.create_path import nearest_neighbor, a_star_search
@@ -56,8 +56,7 @@ def main():
     wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
     goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
-    ROW, COL = 780,1024
-    grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
+    grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc)
 
     goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
     aruco = (aruco_location[1],aruco_location[0])
@@ -100,6 +99,7 @@ def main():
 
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
+    confirmed_balls = None
     while True:
         try:
             frame = stream.get_frame()
@@ -133,6 +133,19 @@ def main():
         for confirmed_ball_pos in confirmed_balls:
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 10, (0, 0, 255), 2)
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+        
+        if confirmed_balls is not None:
+            #print("Confirmed Balls:", confirmed_balls)
+                
+                # Create ballList directly using list comprehension
+            ballList = [tuple(confirmed_ball_pos) for confirmed_ball_pos in confirmed_balls
+                        if isinstance(confirmed_ball_pos, (list, tuple)) and len(confirmed_ball_pos) == 2]
+            #print("Ball List:", ballList)
+            if(len(ballList)>=3):
+                orderOfPoints = nearest_neighbor_simplified(ballList)
+                print("Order of Points:", orderOfPoints)
+            #path = a_star_search(grid, aruco, orderOfPoints[0], weightedGrid)
+            #print("Path:", path)            
 
         if front_point is not None and confirmed_balls: # hybrid a* implementation here
             frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
