@@ -70,7 +70,7 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    visualize_grid(grid, aruco, [aruco,goal], path)
+    #visualize_grid(grid, aruco, [aruco,goal], path)
 
     ########################################
     ### --- END OF INITIAL TESTING --- ###
@@ -134,16 +134,11 @@ def main():
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 10, (0, 0, 255), 2)
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        if confirmed_balls is not None:
-            #print("Confirmed Balls:", confirmed_balls)
-                
-                # Create ballList directly using list comprehension
-            ballList = [tuple(confirmed_ball_pos) for confirmed_ball_pos in confirmed_balls
-                        if isinstance(confirmed_ball_pos, (list, tuple)) and len(confirmed_ball_pos) == 2]
-            #print("Ball List:", ballList)
-            if(len(ballList)>=3):
-                orderOfPoints = nearest_neighbor_simplified(ballList)
-                print("Order of Points:", orderOfPoints)
+        if confirmed_balls is not None and len(confirmed_balls) > 2:
+            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
+            print(len(confirmed_balls))
+            print(len(orderOfPoints))
+            print("Order of Points:", orderOfPoints)
             #path = a_star_search(grid, aruco, orderOfPoints[0], weightedGrid)
             #print("Path:", path)            
 
