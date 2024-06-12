@@ -17,6 +17,11 @@ from global_values.find_aruco import detect_aruco
 from global_values.find_cross import find_and_draw_red_cross
 from global_values.find_egg import detect_egg
 from global_values.find_walls import get_line_pixels_and_corners
+from global_values.create_path import nearest_neighbor, a_star_search
+from global_values.create_grid import gridCreation
+from global_values.display_grid import visualize_grid
+from global_values.create_path import nearest_neighbor, a_star_search
+from global_values.create_path import calculate_distance_to_wall
 ###
 from calibration.robotmotor_calibration import calibrate_robot_movement
 from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
@@ -30,13 +35,19 @@ def main():
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
 #   ble_client = BLEClient(ESP32_ADDRESS)
 #   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
-    starter_cap = cv2.VideoCapture(2)
+    
+    ########################################
+    ### --- START OF INITIAL TESTING --- ###
+    ########################################
+    
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
     ret, starter_frame = starter_cap.read()
+    ROW, COL, channels = starter_frame.shape
+    print("Image : Width:", ROW, "Height:", COL)
     cv2.imwrite('starter_image.png', starter_frame)
-
 
     #global functions
     aruco_location = detect_aruco(starter_frame)
@@ -45,8 +56,14 @@ def main():
     wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
     goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
-    starter_cap.release()
+    ROW, COL = 780,1024
+    grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
 
+    goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
+    aruco = (aruco_location[1],aruco_location[0])
+    path = a_star_search(grid, aruco, goal, weightedGrid)
+
+    starter_cap.release()
 
     print("\n - - - Some values are - - -")
     print("aruco_loc = ", aruco_location)
@@ -54,6 +71,11 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
+    visualize_grid(grid, aruco, [aruco,goal], path)
+
+    ########################################
+    ### --- END OF INITIAL TESTING --- ###
+    ########################################
 
     stream = livestream.LiveStream()
     mtx, dist = None, None   

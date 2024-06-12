@@ -17,7 +17,7 @@ def detect_aruco(frame):
             *midpoint(*corners[0][0][0], *corners[0][0][1]),
             *midpoint(*corners[0][0][2], *corners[0][0][3])
         )    
-        print("Aruco Detection Successful")
+        print("Aruco Detection         | Successful")
         return int(midpoint_aruco[0]), int(midpoint_aruco[1])
 '''
 def detect_aruco_test(frame):

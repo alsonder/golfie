@@ -64,6 +64,7 @@ def decide_goal_loc(aruco_coor, intersections):
     if (distance(*intersections[0], *intersections[3]) > longcorner1):
         longcorner1 = distance(*intersections[0], *intersections[3])
         start_mid_corner2 = intersections[3]
+    #print("longcorner: ",longcorner1)
     
     if (distance(*start_mid_corner2, *intersections[1])!=0):
         dist_corner2 = distance(*start_mid_corner2, *intersections[1])
@@ -78,12 +79,17 @@ def decide_goal_loc(aruco_coor, intersections):
         dist_corner2 = distance(*start_mid_corner2, *intersections[1])
         mid_corner2 = midpoint(*start_mid_corner2, *intersections[1])
     
+    
 
     corner1 =  mid_corner1
     corner2 = mid_corner2
+    #print(corner1)
+    #print(corner2)
 
-    distance1 = distance(aruC[0], aruC[1], *corner1)
-    distance2 = distance(aruC[0], aruC[1], *corner2)    
+    if (aruC is not None):
+        distance1 = distance(aruC[0], aruC[1], *corner1)
+        distance2 = distance(aruC[0], aruC[1], *corner2)    
+    else: print("aruC is None (line 92 in find_goal)")
 
     result1 = corner1 if distance1 > distance2 else corner2
     
@@ -97,7 +103,7 @@ def decide_goal_loc(aruco_coor, intersections):
     result2 = midpoint(*result1, *result2)
     
     #print("result1: {}, result2: {}".format(result2, result1))
-    print("Goal Detection Successful")
+    print("Goal Detection          | Successful")
 
     return [(int(result2[0]), int(result2[1])), (int(result1[0]), int(result1[1]))]
     #example return : [(x1,y1),(x2,y2)]

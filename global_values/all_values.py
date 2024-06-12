@@ -8,7 +8,7 @@ from find_walls import get_line_pixels_and_corners
 ## - imports for main - ##
 def get_map_values(image):
     # Check if the image has been correctly loaded
-    if image is not None: print("Image Detection Successful")
+    if image is not None: print("Image Detection       | Successful")
     else: print("Failed to load the image")
 
     # Temporary Values

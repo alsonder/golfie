@@ -46,17 +46,34 @@ def find_and_draw_red_cross(image):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     '''
+        # Step 7: Fill the cross in the mask
+    filled_mask = np.zeros_like(mask)
+    cv2.fillPoly(filled_mask, [cross_contour], 255)
+
+    # Extract the coordinates of the filled cross
+    filled_pixels = np.column_stack(np.where(filled_mask == 255))
+
+    # Convert to list of tuples
+    coordinates = [(pixel[1], pixel[0]) for pixel in filled_pixels]
+
+    if not coordinates:
+        print("Cross Not Found")
+    else:
+        print("Cross Detection         | Successful")
     # Extract and return coordinates
-                                                          #cross_contour
-    coordinates = [(point[0][0], point[0][1]) for point in contour]
+    return coordinates
+
+    '''
+                                                      #cross_contour
+    coordinates = [(point[0][0], point[0][1]) for point in cross_contour]
 
     if coordinates == None:
         print("Cross Not Found")
     else:
-        print("Cross Detection Successful")    
+        print("Cross Detection         | Successful")    
 
     return coordinates
-
+    '''
 # Example usage
 '''image_path = "global_values/test_image.png"
 image = cv2.imread(image_path)
