@@ -31,7 +31,7 @@ def detect_balls(frame, mtx, dist):
     param1 = 50  # Gradient value used to handle edge detection in Hough transform
     param2 = 13  # Accumulator threshold for the Hough transform circle detection
     min_radius = 6
-    max_radius = 8
+    max_radius = 7
 
     circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 1,
                                param1=param1, param2=param2,
