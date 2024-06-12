@@ -56,7 +56,6 @@ def main():
     wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
     goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
-    ROW, COL = 780,1024
     grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
 
     goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
