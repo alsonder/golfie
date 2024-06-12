@@ -30,11 +30,6 @@ wall_corner_locations, line_pixels = get_line_pixels_and_corners(image)
 
 goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
-from fill_cross import fill_polygon
-
-#if we do not use contours we can use this. which is pretty scuffed but works better if contours still has spaces.
-#filled_polygon_points = fill_polygon(find_cross)
-
 
 ROW, COL = 480,640
 grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
@@ -42,7 +37,9 @@ grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_
 goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
 
 aruco = (aruco_location[1],aruco_location[0])
-path = a_star_search(grid, aruco, goal, weightedGrid)
+path = a_star_search(grid, aruco, (260,320),weightedGrid)
+path += a_star_search(grid, path[-1], goal, weightedGrid)
+
 
 print("\n - - - Some values are - - -")
 print("aruco_loc = ", aruco_location)
