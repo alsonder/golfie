@@ -30,7 +30,7 @@ def main():
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
 #   ble_client = BLEClient(ESP32_ADDRESS)
 #   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
-    starter_cap = cv2.VideoCapture(1)
+    starter_cap = cv2.VideoCapture(2)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
