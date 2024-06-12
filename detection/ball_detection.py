@@ -2,17 +2,18 @@ import cv2
 import numpy as np
 import time
 
-# Global variable to keep track of the last time messages were printed
+# Global variables
 last_print_time = None
+total_balls_last_detected = 0  # Initialize a counter to keep track of the last detected balls
 
 def detect_balls(frame, mtx, dist):
-    global last_print_time
+    global last_print_time, total_balls_last_detected
 
     # Current time at the start of the function call
     current_time = time.time()
 
     # Check if we should print this time
-    if last_print_time is None or (current_time - last_print_time) > 2:
+    if last_print_time is None or (current_time - last_print_time) > 3:
         should_print = True
         last_print_time = current_time  # Update the last print time
     else:
@@ -52,17 +53,22 @@ def detect_balls(frame, mtx, dist):
                 orange_ball_list.append([i[0], i[1]])  # Add to orange ball list
                 # Print each orange ball's location immediately after detection
                 if should_print:
-                    print(f"Orange ball: {i[0]},{i[1]}")
+                    print(f"Orange ball location: {i[0]},{i[1]}")
             else:
                 ball_list.append([i[0], i[1]])  # Add to general ball list
 
     # Append orange balls at the end of the ball list
     ball_list.extend(orange_ball_list)
 
+    # Calculate balls left if balls are being removed, assuming all detections are consistent
+    balls_left = total_balls_last_detected - len(ball_list)
+    total_balls_last_detected = len(ball_list)  # Update the total balls detected
+
     # Conditional printing based on the timer
     if should_print:
         print("No orange ball detected.") if len(orange_ball_list) == 0 else None
+        print("Balls left on field: {}".format(len(ball_list)))
         print(f"All detected balls' locations: {ball_list}")
-        print(f"Number of balls on the field: {len(ball_list)}")
 
     return ball_list
+
