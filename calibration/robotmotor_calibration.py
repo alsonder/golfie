@@ -11,9 +11,11 @@ async def calibrate_robot_movement_async(stream, mtx, dist, ble_client):
     robot_movement = RobotMovement(motor_control)
     robot_movement.start()
 
+    projected_point_initialized = False
+    projected_point = None
+
     try:
-        projected_point_initialized = False
-        current_front_point = None
+        await ble_client.wait_for_connection()
 
         while True:
             frame = stream.get_frame()
@@ -22,34 +24,33 @@ async def calibrate_robot_movement_async(stream, mtx, dist, ble_client):
                 continue
 
             frame_undistorted = cv2.undistort(frame, mtx, dist)
-            aruco_corners, aruco_ids, _ = detect_aruco(stream, mtx, dist, markerLength=0.08)
-
+            aruco_corners, aruco_ids, _ = detect_aruco(frame_undistorted, mtx, dist, markerLength=0.08)
+            frame_with_points = frame_undistorted.copy()
             if aruco_ids is not None and len(aruco_corners) > 0:
-                # Process each detected ArUco marker
                 for corner_group in aruco_corners:
-                    # Get the frame with points drawn and the current front point
-                    frame_with_points, current_front_point = calculate_and_draw_points(frame_undistorted, corner_group[0])
+                    _, current_front_point = calculate_and_draw_points(frame_with_points, corner_group[0])
                     if not projected_point_initialized:
                         direction_vector = calculate_direction_vector(corner_group[0])
-                        scaling_factor = calculate_scaling_factor(corner_group[0], 8)  # Assuming marker width of 8cm
-                        projected_point = calculate_projected_point(np.array(current_front_point), direction_vector, 50, scaling_factor)  
+                        scaling_factor = calculate_scaling_factor(corner_group[0], 8)
+                        projected_point = calculate_projected_point(np.array(current_front_point), direction_vector, 50, scaling_factor)
                         projected_point_initialized = True
-
-                        # Start moving towards the projected point
+                        # Signal to start moving towards the projected point
                         asyncio.run_coroutine_threadsafe(robot_movement.motor_control.move_forward(), ble_client.loop)
 
-                    # Check if the current front point is approximately at the projected point
-                    if projected_point_initialized and current_front_point and abs(current_front_point[0] - projected_point[0]) <= 10:  # Threshold of 10 pixels
+                if projected_point_initialized:
+                    cv2.circle(frame_with_points, projected_point, 5, (0, 0, 255), -1)  # Draw the projected point every frame after it's initialized
+
+                    distance_to_projected_point = np.linalg.norm(np.array(current_front_point) - np.array(projected_point))
+                    if distance_to_projected_point <= 10:  # Check if the robot is close to the projected point
                         asyncio.run_coroutine_threadsafe(robot_movement.motor_control.stop_movement(), ble_client.loop)
                         print("Robot has reached the projected point.")
-                        break
+                        projected_point_initialized = False  # Reset for the next point
 
-            cv2.imshow('Calibration', frame_with_points)  # Use the frame with points drawn
+            cv2.imshow('Calibration', frame_with_points)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
     finally:
         robot_movement.stop()
-
 def calibrate_robot_movement(stream, mtx, dist, ble_client):
     asyncio.run(calibrate_robot_movement_async(stream, mtx, dist, ble_client))
 def calculate_scaling_factor(corners, marker_real_width_cm):
