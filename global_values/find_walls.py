@@ -89,8 +89,8 @@ def get_line_pixels_and_corners(frame):
                 # Convert centroid to a tuple of integers
                 clustered_intersections.append(tuple(map(int, centroid)))
 
-    print("Wall Detection Successful")
-    print("Corner Identification Successful")
+    print("Wall Detection          | Successful")
+    print("Corner Identification   | Successful")
     return all_line_pixels, clustered_intersections
 
 def line_intersection(line1, line2):

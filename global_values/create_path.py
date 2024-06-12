@@ -53,7 +53,7 @@ def calculate_distance_to_wall(grid):
             if is_valid(new_i, new_j, ROW, COL) and distance_to_wall[new_i][new_j] > current_distance + 1:
                 distance_to_wall[new_i][new_j] = current_distance + 1
                 queue.append((new_i, new_j))
-    print("Weights added to grid")
+    print("Weights Added to Grid   | Successful")
     return distance_to_wall
 
 # Implement the A* search algorithm
@@ -160,7 +160,7 @@ def a_star_search(grid, src, dest, distance_to_wall):
     path.append((row, col))
     path.reverse()  # Reverse the path to start from the source
 
-    print("Path to node found")
+    print("Path To Node Found      | Successful")
     return path
 
 def nearest_neighbor(grid, points):

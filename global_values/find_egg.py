@@ -48,7 +48,7 @@ def detect_egg(frame):
     if egg_circle == None:
         print("Egg not found")
     else:
-        print("Egg Detection Successful")       
+        print("Egg Detection           | Successful")       
 
 
     return egg_circle  # Returns the 360points created just above
