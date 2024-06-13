@@ -40,12 +40,12 @@ def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(0)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
     success = 0
-    while (success <= 9):
+    while (success < 9):
         success = 0
         ret, starter_frame = starter_cap.read()
         ROW, COL, channels = starter_frame.shape
@@ -92,7 +92,6 @@ def main():
     ########################################
     ### --- END OF INITIAL TESTING --- ###
     ########################################
-
     stream = livestream.LiveStream()
     mtx, dist = None, None   
     #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
@@ -100,7 +99,8 @@ def main():
     #     print("Camera calibration failed")
     #     return
     live_data = LiveData()
-    ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=8)
+    ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=10, frame_rate=30, ball_count=8)
+    
     #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     total_balls = 8
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
@@ -115,6 +115,9 @@ def main():
     
 
     previousOrderOfPoints = 0
+    orderOfPoints = None
+    path = None
+    currentcorner = None
 
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
@@ -136,8 +139,7 @@ def main():
         if aruco_ids is not None and aruco_corners:
             # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
-                pass
-                #frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
+                frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
         
         detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
         current_time = time.time() 
@@ -152,17 +154,20 @@ def main():
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 10, (0, 0, 255), 2)
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        if detected_balls is not None and len(detected_balls) > 2 and len(detected_balls) != previousOrderOfPoints:
-            orderOfPoints = nearest_neighbor_simplified(detected_balls)
-            previousOrderOfPoints = len(orderOfPoints)
-            print(len(detected_balls))
-            print(len(orderOfPoints))
-            print("Order of Points:", orderOfPoints)
-            #path = a_star_search(grid, aruco, orderOfPoints[0], weightedGrid)
-            #print("Path:", path)            
 
-        if front_point is not None and confirmed_balls: # hybrid a* implementation here
-            frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
+
+        if confirmed_balls is not None and len(confirmed_balls) > 2 and len(confirmed_balls) != previousOrderOfPoints:
+            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
+            previousOrderOfPoints = len(confirmed_balls)
+            path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+        
+        if(path is not None):
+            for coordinate in path: 
+                cv2.circle(frame_undistorted, (coordinate[0], coordinate[1]), 1, (255, 255, 255), 2)    
+
+
+        #if front_point is not None and confirmed_balls: # hybrid a* implementation here
+            #frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
             
         if closest_ball is not None: # hybrid a* implementation here 
             #navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point)

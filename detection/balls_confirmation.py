@@ -16,7 +16,7 @@ class BallConfirmation:
     # Updates the class with the latest detections, and a time, each detected ball is identified by its position, which is tracked and evaluated
 
     def update_detections(self, detected_balls, current_time):
-        proximity_threshold = 15  # Define how close detections need to be (in pixels) to be considered the same ball
+        proximity_threshold = 30  # Define how close detections need to be (in pixels) to be considered the same ball
 
         for position in detected_balls:
             ball_id = tuple(position)
@@ -50,18 +50,21 @@ class BallConfirmation:
         for ball_id in to_remove:
             del self.detections[ball_id]
 
+
+
     # This check if its a new ball, or it should remove previously firm balls
     def _confirm_or_remove_balls(self, current_time):
-        removal_delay = 3  # Additional delay in seconds before removing a ball to account for detection inconsistency
+        removal_delay = 0.3  # Fixed delay in seconds before considering removal
         for ball_id, times in list(self.detections.items()):
-            detection_ratio = len(times) / (self.frame_rate * self.time_window)
+            detection_ratio = len(times) / (self.time_window * self.frame_rate)
             
             if detection_ratio >= self.confirmation_threshold:
                 self.confirmed_balls[ball_id] = times[-1]
             elif ball_id in self.confirmed_balls:
                 time_since_last_seen = current_time - self.confirmed_balls[ball_id]
-                absence_ratio = time_since_last_seen / self.frame_rate
-                if absence_ratio > removal_delay:  # Use a fixed delay to determine removal, adjusting for robustness
+
+                if time_since_last_seen >= removal_delay:
+                    print(f"Removing ball ID: {ball_id}")
                     del self.confirmed_balls[ball_id]
 
 
