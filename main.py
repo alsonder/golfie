@@ -78,7 +78,7 @@ def main():
         except: pass
         try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
         except: print("Path To Node Found      | Failed")
-        print("Successes : ", success)
+        print(f"Successes : {success}/9")
         if (success < 9):
             time.sleep(4.5)
             print("------------------------------------------------------")
