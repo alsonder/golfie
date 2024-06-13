@@ -62,8 +62,10 @@ def main():
         except: print("Cross Detection         | Failed")
         try: egg_loc = detect_egg(starter_frame); success+=1
         except: print("Egg Detection           | Failed")
-        try: wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame); success+=1
-        except: print("Wall Detection          | Failed"); print("Corner Identification   | Successful")
+        try: wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame); success+=2
+        except: 
+            print("Wall Detection          | Failed")
+            if(wall_corner_locations[3]!=None): print("Corner Identification   | Failed"); print(wall_corner_locations)
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")

@@ -19,6 +19,7 @@ def detect_aruco(frame):
         )    
         print("Aruco Detection         | Successful")
         return int(midpoint_aruco[0]), int(midpoint_aruco[1])
+    else: print("Aruco Detection         | Successful")
 '''
 def detect_aruco_test(frame):
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
