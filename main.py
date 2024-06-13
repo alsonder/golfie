@@ -40,28 +40,45 @@ def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(1)
+    starter_cap = cv2.VideoCapture(0)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
-    ret, starter_frame = starter_cap.read()
-    ROW, COL, channels = starter_frame.shape
-    print("Image : Width:", ROW, "Height:", COL)
-    cv2.imwrite('starter_image.png', starter_frame)
+    success = 0
+    while (success <= 9):
+        success = 0
+        ret, starter_frame = starter_cap.read()
+        ROW, COL, channels = starter_frame.shape
+        print("Image : Width:", ROW, "Height:", COL)
+        cv2.imwrite('starter_image.png', starter_frame)
 
-    #global functions
-    aruco_location = detect_aruco(starter_frame)
-    find_cross = find_and_draw_red_cross(starter_frame)
-    egg_loc = detect_egg(starter_frame)
-    wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
-    goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
+        #global functions
+    
+        try: aruco_location = detect_aruco(starter_frame); success+=1
+        except: print("Aruco Detection         | Failed")
+        try: find_cross = find_and_draw_red_cross(starter_frame); success+=1
+        except: print("Cross Detection         | Failed")
+        try: egg_loc = detect_egg(starter_frame); success+=1
+        except: print("Egg Detection           | Failed")
+        try: wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame); success+=1
+        except: print("Wall Detection          | Failed"); print("Corner Identification   | Successful")
 
-    grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc)
+        try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
+        except: print("Goal Detection          | Failed")
+        try: grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc); success+=1
+        except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
-    goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
-    aruco = (aruco_location[1],aruco_location[0])
-    path = a_star_search(grid, aruco, goal, weightedGrid)
-
+        try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
+        except: pass
+        try: aruco = (aruco_location[1],aruco_location[0]); success+=1
+        except: pass
+        try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
+        except: print("Path To Node Found      | Failed")
+        print("Successes : ", success)
+        if (success < 9):
+            time.sleep(4.5)
+            print("------------------------------------------------------")
+    
     starter_cap.release()
 
     print("\n - - - Some values are - - -")
@@ -70,7 +87,7 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    visualize_grid(grid, aruco, [aruco,goal], path)
+    #visualize_grid(grid, aruco, [aruco,goal], path)
 
     ########################################
     ### --- END OF INITIAL TESTING --- ###
