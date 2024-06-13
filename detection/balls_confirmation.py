@@ -67,7 +67,7 @@ class BallConfirmation:
 
     # Returns positions of firm balls
     def get_confirmed_balls_positions(self):
-        return [list(ball_id) for ball_id in self.confirmed_balls.keys()]
+        return [tuple(ball_id) for ball_id in self.confirmed_balls.keys()]
 
     def is_target_count_reached(self):
         return len(self.confirmed_balls) >= self.target_ball_count
