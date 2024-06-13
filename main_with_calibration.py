@@ -1,6 +1,6 @@
 import cv2
 import time
-import os
+import sys
 from livestream import livestream
 from calibration import camera_calibration
 from detection import aruco_detection
@@ -30,8 +30,6 @@ from robotposition.navigation import navigate_to_ball
 
 #from global_values import all_values
 
-    
-
 def main():
     ESP32_ADDRESS = "b0:a7:32:13:a7:26" # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
@@ -42,45 +40,28 @@ def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(0)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
-    success = 0
-    while (success <= 9):
-        success = 0
-        ret, starter_frame = starter_cap.read()
-        ROW, COL, channels = starter_frame.shape
-        print("Image : Width:", ROW, "Height:", COL)
-        cv2.imwrite('starter_image.png', starter_frame)
+    ret, starter_frame = starter_cap.read()
+    ROW, COL, channels = starter_frame.shape
+    print("Image : Width:", ROW, "Height:", COL)
+    cv2.imwrite('starter_image.png', starter_frame)
 
-        #global functions
-    
-        try: aruco_location = detect_aruco(starter_frame); success+=1
-        except: print("Aruco Detection         | Failed")
-        try: find_cross = find_and_draw_red_cross(starter_frame); success+=1
-        except: print("Cross Detection         | Failed")
-        try: egg_loc = detect_egg(starter_frame); success+=1
-        except: print("Egg Detection           | Failed")
-        try: wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame); success+=1
-        except: print("Wall Detection          | Failed"); print("Corner Identification   | Successful")
+    #global functions
+    aruco_location = detect_aruco(starter_frame)
+    find_cross = find_and_draw_red_cross(starter_frame)
+    egg_loc = detect_egg(starter_frame)
+    wall_corner_locations, line_pixels = get_line_pixels_and_corners(starter_frame)
+    goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
-        try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
-        except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc); success+=1
-        except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
+    grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc)
 
-        try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
-        except: pass
-        try: aruco = (aruco_location[1],aruco_location[0]); success+=1
-        except: pass
-        try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
-        except: print("Path To Node Found      | Failed")
-        print("Successes : ", success)
-        if (success < 9):
-            time.sleep(4.5)
-            print("------------------------------------------------------")
-    
+    goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2))
+    aruco = (aruco_location[1],aruco_location[0])
+    path = a_star_search(grid, aruco, goal, weightedGrid)
+
     starter_cap.release()
 
     print("\n - - - Some values are - - -")
@@ -97,16 +78,23 @@ def main():
 
     stream = livestream.LiveStream()
     mtx, dist = None, None   
-    #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
-    # if not ret:
-    #     print("Camera calibration failed")
-    #     return
+    # - Calibration Item - #
+    ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
+    if not ret:
+        print("Camera calibration failed")
+        return
+    else: print("Camera Calibration Successful")
+    
     live_data = LiveData()
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=8)
-    #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
+    # - Calibration Item - #
+    calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
+    
     total_balls = 8
+    # - Calibration Item - #
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)
+    
     if os.path.exists(CALIBRATION_FILE_PATH):
         mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
         print("Loaded existing calibration parameters.")
@@ -115,7 +103,7 @@ def main():
         collect_calibration_images(stream, "calibration_images", num_images=40)
         calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     
-
+    # - Calibration Item - #
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
     confirmed_balls = None
@@ -137,9 +125,10 @@ def main():
         if aruco_ids is not None and aruco_corners:
             # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
-                pass
-                #frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
-        
+                # - Calibration Item - #
+                frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
+                #pass // is replaced with pass if no calibration
+
         detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
         current_time = time.time() 
         ball_confirmation.update_detections(detected_balls, current_time)
@@ -165,6 +154,8 @@ def main():
             frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
             
         if closest_ball is not None: # hybrid a* implementation here 
+
+            # - Calibration Item - # ?
             #navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point)
             total_balls -= 1
             
