@@ -70,7 +70,7 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    #visualize_grid(grid, aruco, [aruco,goal], path)
+    visualize_grid(grid, aruco, [aruco,goal], path)
 
     ########################################
     ### --- END OF INITIAL TESTING --- ###
@@ -97,9 +97,10 @@ def main():
         calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     
 
+    previousOrderOfPoints = 0
+
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
-    confirmed_balls = None
     while True:
         try:
             frame = stream.get_frame()
@@ -134,9 +135,10 @@ def main():
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 10, (0, 0, 255), 2)
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        if confirmed_balls is not None and len(confirmed_balls) > 2:
-            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
-            print(len(confirmed_balls))
+        if detected_balls is not None and len(detected_balls) > 2 and len(detected_balls) != previousOrderOfPoints:
+            orderOfPoints = nearest_neighbor_simplified(detected_balls)
+            previousOrderOfPoints = len(orderOfPoints)
+            print(len(detected_balls))
             print(len(orderOfPoints))
             print("Order of Points:", orderOfPoints)
             #path = a_star_search(grid, aruco, orderOfPoints[0], weightedGrid)
