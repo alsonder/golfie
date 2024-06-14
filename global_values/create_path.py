@@ -224,4 +224,4 @@ def nearest_neighbor_simplified(points):
     # Finally, add the end point
     visit_order.append(end)
 
-    return visit_order
+    return visit_order[1:]

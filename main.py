@@ -157,7 +157,7 @@ def main():
 
 
         if confirmed_balls is not None and len(confirmed_balls) > 2 and len(confirmed_balls) != previousOrderOfPoints:
-            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
+            orderOfPoints = nearest_neighbor_simplified(front_point + confirmed_balls)
             previousOrderOfPoints = len(confirmed_balls)
             path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
         
