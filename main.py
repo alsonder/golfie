@@ -91,12 +91,20 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    #visualize_grid(grid, aruco, [aruco,goal], path)
+    visualize_grid(grid, aruco, [aruco,goal], path)
+
+    transposed_matrix = []
+    for col in range(len(grid[0])):
+        transposed_row = []
+        for row in range(len(grid)):
+            transposed_row.append(grid[row][col])
+        transposed_matrix.append(transposed_row)
+    grid = transposed_matrix
+    print(len(grid), len(grid[0]))
 
     ########################################
     ### --- END OF INITIAL TESTING --- ###
     ########################################
-
     stream = livestream.LiveStream()
     mtx, dist = None, None   
     #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
@@ -104,7 +112,8 @@ def main():
     #     print("Camera calibration failed")
     #     return
     live_data = LiveData()
-    ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=8)
+    ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=10, frame_rate=30, ball_count=8)
+    
     #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     total_balls = 8
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
@@ -118,9 +127,15 @@ def main():
         calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     
 
+    previousOrderOfPoints = 0
+    orderOfPoints = None
+    path = None
+    oldAruco = None
+    count = 0
+
+
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
-    confirmed_balls = None
     while True:
         try:
             frame = stream.get_frame()
@@ -139,8 +154,7 @@ def main():
         if aruco_ids is not None and aruco_corners:
             # Get corners from aruco detection to calculate mid vector and direction
             for corner_group in aruco_corners:
-                pass
-                #frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
+                frame_undistorted, front_point, rear_point= calculate_and_draw_points(frame_undistorted, corner_group[0])
         
         detected_balls = detect_balls(frame_undistorted, mtx, dist)  # Keep checking for moving objects
         current_time = time.time() 
@@ -155,16 +169,37 @@ def main():
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 10, (0, 0, 255), 2)
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        if confirmed_balls is not None and len(confirmed_balls) > 2:
-            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
-            print(len(confirmed_balls))
-            print(len(orderOfPoints))
-            print("Order of Points:", orderOfPoints)
-            #path = a_star_search(grid, aruco, orderOfPoints[0], weightedGrid)
-            #print("Path:", path)            
 
-        if front_point is not None and confirmed_balls: # hybrid a* implementation here
-            frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
+
+        if confirmed_balls is not None and len(confirmed_balls) >= 2 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
+            orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
+            previousOrderOfPoints = len(confirmed_balls)
+            path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+        
+        if(oldAruco != front_point and confirmed_balls is not None and len(confirmed_balls) >= 2) and front_point is not None:
+            oldAruco = front_point
+            orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
+            path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 0:
+                    cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
+
+
+        if(path is not None):
+            for coordinate in path: 
+                cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
+
+        if (count >= 100):
+            count = 0
+            print(orderOfPoints)
+        else: 
+            count+=1
+
+
+        #if front_point is not None and confirmed_balls: # hybrid a* implementation here
+            #frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
             
         if closest_ball is not None: # hybrid a* implementation here 
             #navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point)

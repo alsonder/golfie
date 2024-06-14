@@ -50,12 +50,12 @@ def detect_balls(frame, mtx, dist):
             if lower_orange[0] <= ball_hsv_value[0] <= upper_orange[0] and \
                lower_orange[1] <= ball_hsv_value[1] <= upper_orange[1] and \
                lower_orange[2] <= ball_hsv_value[2] <= upper_orange[2]:
-                orange_ball_list.append([i[0], i[1]])  # Add to orange ball list
+                orange_ball_list.append((i[0], i[1]))  # Add to orange ball list as tuple
                 # Print each orange ball's location immediately after detection
                 if should_print:
                     print(f"Orange ball location: {i[0]},{i[1]}")
             else:
-                ball_list.append([i[0], i[1]])  # Add to general ball list
+                ball_list.append((i[0], i[1]))  # Add to general ball list as tuple
 
     # Append orange balls at the end of the ball list
     ball_list.extend(orange_ball_list)
@@ -72,3 +72,4 @@ def detect_balls(frame, mtx, dist):
 
     return ball_list
 
+# Your existing code where this function is called...
