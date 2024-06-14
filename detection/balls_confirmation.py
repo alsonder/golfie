@@ -4,7 +4,7 @@ import numpy as np
 class BallConfirmation:
     # pass in variables for confirmation, 20% of the frames must contain tthe circle for it to become a firm ball, to be a removed ball 80% of 
     #frames must be without the ball, if its been still for 5 seconds, it becomes a firm ball, usage in a camera which processes 30 fps
-    def __init__(self, confirmation_threshold=0.18, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=8):
+    def __init__(self, confirmation_threshold=0.18, removal_threshold=0.8, time_window=5, frame_rate=5, ball_count=8):
         self.confirmation_threshold = confirmation_threshold
         self.removal_threshold = removal_threshold
         self.ball_count=ball_count

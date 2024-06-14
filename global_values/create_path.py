@@ -63,7 +63,7 @@ def a_star_search(grid, src, dest, distance_to_wall):
 
     # Check if the source and destination are valid
     if not is_valid(src[0], src[1], ROW, COL) or not is_valid(dest[0], dest[1], ROW, COL):
-        print("Source or destination is invalid")
+        print("Source or destination is invalid: ", src, dest)
         return None
 
     # Check if the source and destination are unblocked
@@ -224,4 +224,4 @@ def nearest_neighbor_simplified(points):
     # Finally, add the end point
     visit_order.append(end)
 
-    return visit_order
+    return visit_order[1:]

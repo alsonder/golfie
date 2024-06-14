@@ -87,7 +87,16 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    #visualize_grid(grid, aruco, [aruco,goal], path)
+    visualize_grid(grid, aruco, [aruco,goal], path)
+
+    transposed_matrix = []
+    for col in range(len(grid[0])):
+        transposed_row = []
+        for row in range(len(grid)):
+            transposed_row.append(grid[row][col])
+        transposed_matrix.append(transposed_row)
+    grid = transposed_matrix
+    print(len(grid), len(grid[0]))
 
     ########################################
     ### --- END OF INITIAL TESTING --- ###
@@ -117,7 +126,9 @@ def main():
     previousOrderOfPoints = 0
     orderOfPoints = None
     path = None
-    currentcorner = None
+    oldAruco = None
+    count = 0
+
 
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
@@ -156,14 +167,31 @@ def main():
         
 
 
-        if confirmed_balls is not None and len(confirmed_balls) > 2 and len(confirmed_balls) != previousOrderOfPoints:
-            orderOfPoints = nearest_neighbor_simplified(confirmed_balls)
+        if confirmed_balls is not None and len(confirmed_balls) >= 2 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
+            orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
             previousOrderOfPoints = len(confirmed_balls)
             path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
         
+        if(oldAruco != front_point and confirmed_balls is not None and len(confirmed_balls) >= 2) and front_point is not None:
+            oldAruco = front_point
+            orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
+            path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 0:
+                    cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
+
+
         if(path is not None):
             for coordinate in path: 
-                cv2.circle(frame_undistorted, (coordinate[0], coordinate[1]), 1, (255, 255, 255), 2)    
+                cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
+
+        if (count >= 100):
+            count = 0
+            print(orderOfPoints)
+        else: 
+            count+=1
 
 
         #if front_point is not None and confirmed_balls: # hybrid a* implementation here
