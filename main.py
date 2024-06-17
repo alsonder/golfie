@@ -49,7 +49,7 @@ def main():
         success = 0
         ret, starter_frame = starter_cap.read()
         ROW, COL, channels = starter_frame.shape
-        print("Image : Width:", ROW, "Height:", COL)
+        print("Image : Width:", COL, "Height:", ROW)
         cv2.imwrite('starter_image.png', starter_frame)
 
         #global functions
@@ -65,7 +65,7 @@ def main():
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc); success+=1
+        try: grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc); success+=1
         except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
         try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
@@ -102,7 +102,11 @@ def main():
     ### --- END OF INITIAL TESTING --- ###
     ########################################
     stream = livestream.LiveStream()
-    mtx, dist = None, None   
+    mtx = np.array([[427.37649845,   0.,         325.09842022],
+    [  0.,         400.30539872, 242.34431018],
+    [  0.,           0.,           1.        ]])
+
+    dist = np.array([[0, 0,   0,  0, 0]]) 
     #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
     # if not ret:
     #     print("Camera calibration failed")
@@ -189,7 +193,9 @@ def main():
 
         if (count >= 100):
             count = 0
+            print("her")
             print(orderOfPoints)
+            print("her")
         else: 
             count+=1
 
