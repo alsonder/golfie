@@ -36,6 +36,8 @@ def main():
 #   ble_client = BLEClient(ESP32_ADDRESS)
 #   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
     
+
+
     ########################################
     ### --- START OF INITIAL TESTING --- ### 
     ########################################
@@ -103,6 +105,7 @@ def main():
     #stream = livestream.LiveStream()
     # replaced for video : 
     video_path = "video_files/ball_movement.mp4"
+    
     video_cap = cv2.VideoCapture(video_path)
     if not video_cap.isOpened():
         print("Error: Cannot open video file.")
@@ -122,6 +125,9 @@ def main():
     #calibrate_and_detect_balls(stream, mtx, dist)
     if os.path.exists(CALIBRATION_FILE_PATH):
         mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+        print(dist)
+        dist[:] = 0
+        print(dist)
         print("Loaded existing calibration parameters.")
     else:
         print("Calibration parameters not found. Please run calibration process.")
@@ -157,7 +163,8 @@ def main():
         # If frame is read successfully
         if ret:
             # Display the frame
-            cv2.imshow('Video Loop', frame)
+            frame_resized = cv2.resize(frame, (int(frame.shape[1]*0.6), int(frame.shape[0]*0.6)))
+            cv2.imshow('Video Loop', frame_resized) # frame
             if cv2.waitKey(1) & 0xFF == ord('q'):  # Wait for the 'q' key to quit
                 break
         else:
@@ -214,14 +221,14 @@ def main():
                 # logic regarding goal position and 
                 break
         # Display the processed frame
-        cv2.imshow('Processed Video', frame) #frame/frame_undistorted
-        if cv2.getWindowProperty('Processed Video', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #cv2.imshow('Processed Video', frame) #frame/frame_undistorted
+        #if cv2.getWindowProperty('Processed Video', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
 
         # Show the frame
-        cv2.imshow('Live Stream', frame_undistorted)
-        if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #cv2.imshow('Live Stream', frame_undistorted)
+        #if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
 
 
 
