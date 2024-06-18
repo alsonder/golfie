@@ -18,5 +18,7 @@ def gridCreation(row, col, obstacles):
         grid[y][x] = 0
 
     print("Grid Creation           | Successful")
+    print(len(grid), len(grid[0]))
     weighted = calculate_distance_to_wall(grid)
+    print(len(weighted), len(weighted[0]))
     return grid, weighted

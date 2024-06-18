@@ -22,7 +22,7 @@ def is_destination(row, col, dest):
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
 def calculate_h_value(row, col, dest, distance_to_wall):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (50 / (1 + distance_to_wall))
+    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (50 / (0.01 + distance_to_wall))
 
 from collections import deque
 
@@ -207,8 +207,8 @@ def nearest_neighbor_simplified(points):
         return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
     start = points[0]  # Start from the first point
-    end = points[-1]   # Ensure ending at the last point
-    other_points = points[1:-1]  # Points in between
+    #end = points[-1]   # Ensure ending at the last point
+    other_points = points[1:]  # Points in between
 
     visit_order = [start]
     unvisited = set(other_points)
@@ -222,6 +222,51 @@ def nearest_neighbor_simplified(points):
         unvisited.remove(next_point)
 
     # Finally, add the end point
-    visit_order.append(end)
+    #visit_order.append(end)
 
     return visit_order[1:]
+
+
+def calculate_turn_points(path, threshold=1):
+    # Define the possible directions
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    
+    def get_direction(p1, p2):
+        return (p2[0] - p1[0], p2[1] - p1[1])
+
+    def distance(p1, p2):
+        return ((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2) ** 0.5
+
+    # Initialize the list of turn points
+    turn_points = []
+
+    if len(path) < 2:
+        return path  # Not enough points to have any turns
+
+    # Start by adding the first point as it is always a turn point
+    turn_points.append(path[0])
+
+    # Iterate over the path to detect turns
+    for i in range(1, len(path) - 1):
+        # Get the direction of the current segment and the next segment
+        direction1 = get_direction(path[i - 1], path[i])
+        direction2 = get_direction(path[i], path[i + 1])
+
+        # Check if the direction changes
+        if direction1 != direction2:
+            turn_points.append(path[i])
+
+    # Add the last point as it is always a turn point
+    turn_points.append(path[-1])
+
+    # Remove close turn points
+    filtered_turn_points = []
+    last_turn_point = turn_points[0]
+    filtered_turn_points.append(last_turn_point)
+
+    for point in turn_points[1:]:
+        if distance(last_turn_point, point) > threshold:
+            filtered_turn_points.append(point)
+        last_turn_point = point
+
+    return filtered_turn_points

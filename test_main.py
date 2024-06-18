@@ -13,7 +13,7 @@ from detection.balls_confirmation import BallConfirmation
 from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
-#from connection.bluetooth import start_ble_client_thread, BLEClient
+from connection.bluetooth import start_ble_client_thread, BLEClient
 ###
 from global_values.find_goal import decide_goal_loc
 from global_values.find_aruco import detect_aruco
@@ -28,15 +28,18 @@ from global_values.create_path import calculate_distance_to_wall
 ###
 from calibration.robotmotor_calibration import calibrate_robot_movement
 from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
-from robotposition.navigation import navigate_to_ball
+from robotposition.test_navigation import navigate_to_ball, simple_navigate_to_ball
 
 #from global_values import all_values
 
-def main():
+#
+import asyncio
+
+async def main():
     ESP32_ADDRESS = "30:c9:22:11:e9:92"  # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
-#   ble_client = BLEClient(ESP32_ADDRESS)
-#   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
+    ble_client = BLEClient(ESP32_ADDRESS)
+    ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
     
     ########################################
     ### --- START OF INITIAL TESTING --- ###
@@ -47,7 +50,7 @@ def main():
         print("Cannot open camera")
         return None
     success = 0
-    while (success < 9):
+    while (success < 8):
         success = 0
         ret, starter_frame = starter_cap.read()
         ROW, COL, channels = starter_frame.shape
@@ -74,10 +77,10 @@ def main():
         except: pass
         try: aruco = (aruco_location[1],aruco_location[0]); success+=1
         except: pass
-        try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
-        except: print("Path To Node Found      | Failed")
+        #try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
+        #except: print("Path To Node Found      | Failed")
         print("Successes : ", success)
-        if (success < 9):
+        if (success < 8):
             time.sleep(4.5)
             print("------------------------------------------------------")
     
@@ -89,7 +92,7 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    visualize_grid(grid, aruco, [aruco,goal], path)
+    #visualize_grid(grid, aruco, [aruco,goal], [(1,0),(0,1)])
 
     transposed_matrix = []
     for col in range(len(grid[0])):
@@ -120,12 +123,16 @@ def main():
         print("Calibration parameters not found. Please run calibration process.")
         collect_calibration_images(stream, "calibration_images", num_images=40)
         calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
+    
 
-    oldLength = 0
+    is_navigating = False
+    previousOrderOfPoints = 0
     orderOfPoints = None
     path = None
-    is_navigating = False
-    oldLength = 0
+    begin = False
+    taskexists = False
+    startup = True
+
     while True:
     
         try:
@@ -151,11 +158,10 @@ def main():
         ball_confirmation.update_detections(detected_balls, current_time)
         confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
         live_data.update_balls_data(confirmed_balls)
-        print("-----------------------------------")
-        print("Confirmed balls: ", confirmed_balls)
-        print("Number of confirmed balls: ", len(confirmed_balls))
+        #print("-----------------------------------")
+        #print("Confirmed balls: ", confirmed_balls)
+        #print("Number of confirmed balls: ", len(confirmed_balls))
 
-        #print("Confirmed balls:", confirmed_balls)
 
 
         # Draw detected and confirmed balls
@@ -166,12 +172,14 @@ def main():
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
 
+#        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
+        if confirmed_balls is not None and len(confirmed_balls) > 0 and front_point is not None:
+            orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
+            
+            previousOrderOfPoints = len(confirmed_balls)
+            #path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+            #print("path created", path[:4], orderOfPoints)
         
-        if confirmed_balls is not None and len(confirmed_balls) >= 2 and front_point is not None and oldLength != len(confirmed_balls):
-                orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls) 
-                oldLength = len(confirmed_balls)
-                try: path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
-                except: path = [(0,0),(0,1)]
 
         for i in range(len(grid)):
             for j in range(len(grid[0])):
@@ -183,22 +191,48 @@ def main():
             for coordinate in path: 
                 cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
 
-        #if front_point is not None and confirmed_balls:
-            #frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
 
-        if closest_ball is not None and not is_navigating:
+        #if front_point is not None and confirmed_balls:
+        #    frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
+
+        if orderOfPoints is not None:
+            if len(orderOfPoints) >= 3:
+                begin = True
+
+        if front_point is not None and orderOfPoints is not None and begin:
+            closest_ball = orderOfPoints[0]
+
+        if closest_ball is not None and not taskexists:
             print("Starting navigation.")
-            is_navigating = True
-            #navigate_to_ball(stream, mtx, dist, ble_client, closest_ball, front_point, rear_point, lambda: None)
-            is_navigating = False
+            taskexists = True
+            print(f"boutta look for {closest_ball} and the order is: {orderOfPoints}")
+            nav_success, point = await simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup)
+            startup = False
+            taskexists = False
+
+            if nav_success:
+                print("RAAAAAAAARGH WE GOT THERE")
+                point = (point[1],point[0])
+                if orderOfPoints:
+                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                    if(point in orderOfPoints):
+                        orderOfPoints.remove(point)
+                    if(point in confirmed_balls):
+                        ball_confirmation.remove_confirmed_ball_by_coordinates(point)
+                    closest_ball = orderOfPoints[0]
+                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
 
         cv2.imshow('Live Stream', frame_undistorted)
 
         if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    
+        await asyncio.sleep(0.01)  # Add a small sleep to ensure cooperative multitasking
 
     stream.release()
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+
+
+    asyncio.run(main())

@@ -45,7 +45,7 @@ def detect_balls(frame, mtx, dist):
     # Append orange balls at the end of the ball list
     ball_list.extend(orange_ball_list)
 
-    print("Detected balls:", ball_list)
+    #print("Detected balls:", ball_list)
     return ball_list
 
 # Usage in your existing code, e.g., within a loop where you capture frames from the camera:

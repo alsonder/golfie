@@ -66,3 +66,16 @@ class BallConfirmation:
     def get_confirmed_balls_positions(self):
         return [tuple(ball_id) for ball_id in self.confirmed_balls.keys()]
 
+    def remove_confirmed_ball_by_coordinates(self, coordinates, proximity_threshold=30):
+        ball_id_to_remove = None
+        for ball_id in self.confirmed_balls.keys():
+            if np.linalg.norm(np.array(coordinates) - np.array(ball_id)) < proximity_threshold:
+                ball_id_to_remove = ball_id
+                break
+
+        if ball_id_to_remove:
+            print(f"Removing ball ID: {ball_id_to_remove} based on coordinates {coordinates}.")
+            del self.confirmed_balls[ball_id_to_remove]
+            print("Confirmed balls:", self.confirmed_balls)
+        else:
+            print(f"No ball found within {proximity_threshold} pixels of coordinates {coordinates}.")

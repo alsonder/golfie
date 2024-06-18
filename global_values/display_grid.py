@@ -31,4 +31,4 @@ def visualize_grid(grid, src, dest, path):
     for point in dest:
         draw.rectangle([point[1] * CELL_SIZE, point[0] * CELL_SIZE, (point[1] + 1) * CELL_SIZE, (point[0] + 1) * CELL_SIZE], fill=COLOR_DESTINATION)
 
-    #img.show()
+    img.show()
