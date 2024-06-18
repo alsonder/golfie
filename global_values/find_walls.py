@@ -12,8 +12,9 @@ def get_line_pixels_and_corners(frame):
         return [], []
 
     # Define the color range for red
-    lower_red = np.array([0, 0, 100])
-    upper_red = np.array([50, 50, 255])
+    # Expanding the range to capture more shades of red
+    lower_red = np.array([0, 0, 200])  # More emphasis on high red values, low green and blue
+    upper_red = np.array([50, 50, 255])  # Allows for lighter reds with some green and blue
 
     # Create a mask for red pixels
     mask = cv2.inRange(img, lower_red, upper_red)
@@ -68,7 +69,23 @@ def get_line_pixels_and_corners(frame):
             pixels = get_line_pixels(x1, y1, x2, y2)
             all_line_pixels.extend(pixels)
 
-    # Find intersections
+    # Function to find intersections
+    def line_intersection(line1, line2):
+        x1, y1, x2, y2 = line1[0]
+        x3, y3, x4, y4 = line2[0]
+        denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        if denominator == 0:
+            return None  # Lines are parallel, no intersection
+        px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denominator
+        py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denominator
+        return (px, py)
+
+    def is_within_bounds(pt, line):
+        x, y = pt
+        x1, y1, x2, y2 = line
+        return min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2)
+
+    # Find intersections and cluster them
     intersections = []
     if lines is not None:
         for i in range(len(lines)):
@@ -93,23 +110,8 @@ def get_line_pixels_and_corners(frame):
     print("Corner Identification   | Successful")
     return all_line_pixels, clustered_intersections
 
-def line_intersection(line1, line2):
-    x1, y1, x2, y2 = line1[0]
-    x3, y3, x4, y4 = line2[0]
-    denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
-    if denominator == 0:
-        return None  # Lines are parallel, no intersection
-    px = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / denominator
-    py = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / denominator
-    return (px, py)
-
-def is_within_bounds(pt, line):
-    x, y = pt
-    x1, y1, x2, y2 = line
-    return min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2)
-
 # Example usage
-#image = cv2.imread('global_values/test_image.png')
-#line_pixels, corners = get_line_pixels_and_corners(image)
-#print("Line Pixels:", line_pixels)
-#print("Corners:", corners)
+# image = cv2.imread('path_to_image.jpg')
+# line_pixels, corners = get_line_pixels_and_corners(image)
+# print("Line Pixels:", line_pixels)
+# print("Corners:", corners)

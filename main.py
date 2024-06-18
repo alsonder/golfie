@@ -1,6 +1,7 @@
 import cv2
 import time
 import sys
+import numpy as np
 from livestream import livestream
 from calibration import camera_calibration
 from detection import aruco_detection
@@ -40,7 +41,7 @@ def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(1)
+    starter_cap = cv2.VideoCapture(2)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
@@ -49,7 +50,7 @@ def main():
         success = 0
         ret, starter_frame = starter_cap.read()
         ROW, COL, channels = starter_frame.shape
-        print("Image : Width:", ROW, "Height:", COL)
+        print("Image : Width:", COL, "Height:", ROW)
         cv2.imwrite('starter_image.png', starter_frame)
 
         #global functions
@@ -65,7 +66,7 @@ def main():
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW+50,COL+50, wall_corner_locations+find_cross+egg_loc); success+=1
+        try: grid, weightedGrid = gridCreation(ROW+1, COL, wall_corner_locations+find_cross+egg_loc); success+=1
         except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
         try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
@@ -102,7 +103,11 @@ def main():
     ### --- END OF INITIAL TESTING --- ###
     ########################################
     stream = livestream.LiveStream()
-    mtx, dist = None, None   
+    mtx = np.array([[427.37649845,   0.,         325.09842022],
+    [  0.,         400.30539872, 242.34431018],
+    [  0.,           0.,           1.        ]])
+
+    dist = np.array([[0, 0,   0,  0, 0]]) 
     #ret, mtx, dist, tvecs, rvecs = camera_calibration.calibrate_camera(stream) # @AS: we dont need tvecs and rvecs anymore, we are in 2d, removed it
     # if not ret:
     #     print("Camera calibration failed")
@@ -111,16 +116,16 @@ def main():
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=10, frame_rate=30, ball_count=8)
     
     #calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
-    total_balls = 8
+    #total_balls = 8
     # Uncomment this line if first time the program runs in the day and calibrate, see the file for instructions
     #calibrate_and_detect_balls(stream, mtx, dist)
-    if os.path.exists(CALIBRATION_FILE_PATH):
-        mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
-        print("Loaded existing calibration parameters.")
-    else:
-        print("Calibration parameters not found. Please run calibration process.")
-        collect_calibration_images(stream, "calibration_images", num_images=40)
-        calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
+    #if os.path.exists(CALIBRATION_FILE_PATH):
+     #   mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+     #   print("Loaded existing calibration parameters.")
+    #else:
+    #    print("Calibration parameters not found. Please run calibration process.")
+    #    collect_calibration_images(stream, "calibration_images", num_images=40)
+    #    calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)
     
 
     previousOrderOfPoints = 0
@@ -133,6 +138,7 @@ def main():
     # Calibrate pwm for the motors, comment when hardcoded and MCU is flashed again with new calibrated values
     #calibrate_robot_movement(stream, mtx, dist, ble_client)
     while True:
+    
         try:
             frame = stream.get_frame()
         except Exception as e:
@@ -157,6 +163,12 @@ def main():
         ball_confirmation.update_detections(detected_balls, current_time)
         confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
         live_data.update_balls_data(confirmed_balls)
+        print("-----------------------------------")
+        print("Confirmed balls: ", confirmed_balls)
+        print("Number of confirmed balls: ", len(confirmed_balls))
+
+        #print("Confirmed balls:", confirmed_balls)
+
 
         # Draw detected and confirmed balls
         for ball_pos in detected_balls:
@@ -189,7 +201,9 @@ def main():
 
         if (count >= 100):
             count = 0
+            print("her")
             print(orderOfPoints)
+            print("her")
         else: 
             count+=1
 
