@@ -226,9 +226,9 @@ def main():
         #    break
 
         # Show the frame
-        #cv2.imshow('Live Stream', frame_undistorted)
-        #if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
-        #    break
+        cv2.imshow('Live Stream', frame_undistorted)
+        if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
 
 
