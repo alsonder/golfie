@@ -1,7 +1,7 @@
 import cv2
 
 class LiveStream:
-    def __init__(self, camera_id=1):  # Change this line
+    def __init__(self, camera_id=2):  # Change this line
         self.cap = cv2.VideoCapture(camera_id)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)  # Set frame width
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
