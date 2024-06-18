@@ -8,9 +8,9 @@ CHECKERBOARD = (9, 6)
 CALIBRATION_IMAGES_DIRECTORY = "calibration_images"
 CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
 CRITERIA = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.001)
-SQUARE_SIZE = 2.5  # The actual size of the checkerboard square in your unit of choice
+SQUARE_SIZE = 2.5  # checker board square size
 
-def collect_calibration_images(stream, save_directory, num_images=40):
+def collect_calibration_images(stream, save_directory, num_images=40):#set to 40 to get a decent size control
     """
     Captures calibration images from the provided video stream, applies histogram equalization,
     and saves them to the specified directory.

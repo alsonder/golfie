@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 import cv2
 import time
@@ -24,3 +25,6 @@ def test():
     mtx, dist = None, None
 
     detection.detect_egg("images_with_eggs.jpg", mtx, dist)
+=======
+"b0:a7:32:15:9e:0a"
+>>>>>>> robotmovement
