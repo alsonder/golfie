@@ -22,7 +22,7 @@ def is_destination(row, col, dest):
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
 def calculate_h_value(row, col, dest, distance_to_wall):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (50 / (1 + distance_to_wall))
+    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (500 / (0.01 + distance_to_wall))
 
 from collections import deque
 
