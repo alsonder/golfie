@@ -13,8 +13,7 @@ from detection.balls_confirmation import BallConfirmation
 from pathfinding.robot_point_calculation import calculate_and_draw_points
 from pathfinding.shortest_path import find_closest_ball
 from ball_image_calibration import calibrate_and_detect_balls
-#from connection.bluetooth import start_ble_client_thread, BLEClient
-###
+from connection.bluetooth import start_ble_client_thread, BLEClient
 from global_values.find_goal import decide_goal_loc
 from global_values.find_aruco import detect_aruco
 from global_values.find_cross import find_and_draw_red_cross
@@ -25,7 +24,6 @@ from global_values.create_grid import gridCreation
 from global_values.display_grid import visualize_grid
 from global_values.create_path import nearest_neighbor, a_star_search
 from global_values.create_path import calculate_distance_to_wall
-###
 from calibration.robotmotor_calibration import calibrate_robot_movement
 from calibration.cam_calibrationV2 import collect_calibration_images, load_calibration_parameters, calibrate_camera_from_images
 from robotposition.navigation import navigate_to_ball
@@ -35,19 +33,48 @@ from robotposition.navigation import navigate_to_ball
 def main():
     ESP32_ADDRESS = "30:c9:22:11:e9:92"  # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
-#   ble_client = BLEClient(ESP32_ADDRESS)
-#   ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
+    ble_client = BLEClient(ESP32_ADDRESS)
+    ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
     
+    ## calibrate_robot_movement(ble_client)
+    '''stream = livestream.LiveStream() #comment
+
+    dist, mtx = None, None
+    #dist = np.array([[0, 0,0,  0, 0]]) 
+    live_data = LiveData()
+    total_balls = 1
+    ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=total_balls)
+
+    if os.path.exists(CALIBRATION_FILE_PATH):
+        mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+        print("Loaded existing calibration parameters.")
+    else:
+        print("Calibration parameters not found. Please run calibration process.")
+        collect_calibration_images(stream, "calibration_images", num_images=40)
+        calibrate_camera_from_images("calibration_images", CALIBRATION_FILE_PATH)'''
+    ## cali
+
+
     ########################################
     ### --- START OF INITIAL TESTING --- ###
     ########################################
+    starter_cap = cv2.VideoCapture(2)
+    starter_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1024)  # Set frame width
+    starter_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 768)
+
+    #
+    #dist, mtx = None, None
+    #if os.path.exists(CALIBRATION_FILE_PATH):
+    #    mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+    #    print("Loaded existing calibration parameters.")
     
-    starter_cap = cv2.VideoCapture(1)
+    #undist_start_frame = cv2.undistort(starter_cap, mtx, dist)
+    #
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
     success = 0
-    while (success < 9):
+    while (success < 8):
         success = 0
         ret, starter_frame = starter_cap.read()
         ROW, COL, channels = starter_frame.shape
@@ -74,10 +101,10 @@ def main():
         except: pass
         try: aruco = (aruco_location[1],aruco_location[0]); success+=1
         except: pass
-        try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
-        except: print("Path To Node Found      | Failed")
+        #try: path = a_star_search(grid, aruco, goal, weightedGrid); success+=1
+        #except: print("Path To Node Found      | Failed")
         print("Successes : ", success)
-        if (success < 9):
+        if (success <8):
             time.sleep(4.5)
             print("------------------------------------------------------")
     
@@ -89,7 +116,7 @@ def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    visualize_grid(grid, aruco, [aruco,goal], path)
+    visualize_grid(grid, aruco, [aruco,goal], [(0,0),(1,1)])
 
     transposed_matrix = []
     for col in range(len(grid[0])):
@@ -104,15 +131,17 @@ def main():
     ### --- END OF INITIAL TESTING --- ###
     ########################################
     stream = livestream.LiveStream()
-    mtx = np.array([[427.37649845,   0.,         325.09842022],
-    [  0.,         400.30539872, 242.34431018],
-    [  0.,           0.,           1.        ]])
+    
+    
+    #mtx = np.array([[427.37649845,   0.,         325.09842022],
+    #[  0.,         400.30539872, 242.34431018],
+    #[  0.,           0.,           1.        ]])
 
-    dist = np.array([[0, 0,0,  0, 0]]) 
+    dist, mtx = None, None
+    #dist = np.array([[0, 0,0,  0, 0]]) 
     live_data = LiveData()
     total_balls = 1
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=total_balls)
-
     if os.path.exists(CALIBRATION_FILE_PATH):
         mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
         print("Loaded existing calibration parameters.")
@@ -137,7 +166,10 @@ def main():
             print("Failed to get frame")
             break
 
-        frame_undistorted = cv2.undistort(frame, mtx, dist)
+        frame_undistorted = frame 
+        cv2.undistort(frame, mtx, dist)
+        #calibrate_and_detect_balls(stream, mtx, dist)
+
         front_point, rear_point, closest_ball = None, None, None
 
         # Process ArUco markers
@@ -193,6 +225,7 @@ def main():
             is_navigating = False
 
         cv2.imshow('Live Stream', frame_undistorted)
+        #cv2.imshow('Live Stream', frame)
 
         if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
             break
