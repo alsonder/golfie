@@ -42,7 +42,11 @@ def detect_egg(frame):
             X = int(egg[0] + (20 * np.cos(360/(i+1))))
             Y = int(egg[1] + (20 * np.sin(360/(i+1))))
             egg_circle.append((X,Y))
+            X1 = int(egg[0] + (21 * np.cos(360/(i+1))))
+            Y1 = int(egg[1] + (21 * np.sin(360/(i+1))))
+            egg_circle.append((X1,Y1))
             cv2.circle(frame, (int(X), int(Y)), 1, (0, 255, 0), -1)
+            cv2.circle(frame, (int(X1), int(Y1)), 1, (0, 255, 0), -1)
             
     
     if egg_circle == None:
