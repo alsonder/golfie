@@ -2,7 +2,7 @@ import asyncio
 from bleak import BleakClient
 import threading
 
-ESP32_ADDRESS = "30:c9:22:11:e9:92"  # ESP's unique MAC address
+ESP32_ADDRESS = "30:C9:22:12:58:72"  # ESP's unique MAC address
 CONTROL_CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"  # Hardcoded UUID
 
 class BLEClient:

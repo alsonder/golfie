@@ -36,7 +36,7 @@ from robotposition.test_navigation import navigate_to_ball, simple_navigate_to_b
 import asyncio
 
 async def main():
-    ESP32_ADDRESS = "30:c9:22:11:e9:92"  # Esp MAC address
+    ESP32_ADDRESS = "30:C9:22:12:58:72"  # Esp MAC address
     CALIBRATION_FILE_PATH = "calibration_parametersV2.npz"
     ble_client = BLEClient(ESP32_ADDRESS)
     ble_thread = start_ble_client_thread(ble_client)  # Start BLE operations in a separate thread and capture the thread object
@@ -49,6 +49,13 @@ async def main():
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
+    
+    # Set the desired resolution
+    desired_width = 1024
+    desired_height = 768
+    starter_cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
+    starter_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, desired_height)
+
     success = 0
     while (success < 8):
         success = 0
@@ -70,7 +77,7 @@ async def main():
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW+5, COL+5, wall_corner_locations+find_cross+egg_loc); success+=1
+        try: grid, weightedGrid = gridCreation(ROW, COL, wall_corner_locations+find_cross+egg_loc); success+=1
         except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
         try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
@@ -117,7 +124,7 @@ async def main():
     ball_confirmation = BallConfirmation(confirmation_threshold=0.1, removal_threshold=0.8, time_window=5, frame_rate=30, ball_count=total_balls)
 
     if os.path.exists(CALIBRATION_FILE_PATH):
-        mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
+        #mtx, dist, _, _ = load_calibration_parameters(CALIBRATION_FILE_PATH)
         print("Loaded existing calibration parameters.")
     else:
         print("Calibration parameters not found. Please run calibration process.")
@@ -132,7 +139,7 @@ async def main():
     begin = False
     taskexists = False
     startup = True
-
+    #calibrate_and_detect_balls(stream,mtx, dist)
     while True:
     
         try:
