@@ -35,22 +35,21 @@ class BallConfirmation:
         self._cleanup_detections(current_time)
         self._confirm_or_remove_balls(current_time)
 
-    
-
     def _confirm_or_remove_balls(self, current_time):
-        removal_delay = 0.3  # Delay before considering a ball removed
         for ball_id, times in list(self.detections.items()):
             detection_ratio = len(times) / (self.time_window * self.frame_rate)
 
-            # Confirm or remove based on detection ratio and time since last seen
+            # Confirm based on detection ratio
             if detection_ratio >= self.confirmation_threshold:
                 self.confirmed_balls[ball_id] = current_time
-            if ball_id in self.confirmed_balls:
-                time_since_last_seen = current_time - self.confirmed_balls[ball_id]
-                if time_since_last_seen >= removal_delay:
-                    print(f"Removing ball ID: {ball_id} due to inactivity for {time_since_last_seen} seconds.")
-                    del self.confirmed_balls[ball_id]
-                    print("Confirmed balls:", self.confirmed_balls)
+
+        removal_delay = self.time_window  # Time window to consider a ball for removal
+        for confirmed_id in list(self.confirmed_balls.keys()):
+            time_since_last_seen = current_time - self.confirmed_balls[confirmed_id]
+            if time_since_last_seen >= removal_delay:
+                print(f"Removing ball ID: {confirmed_id} due to inactivity for {time_since_last_seen} seconds.")
+                del self.confirmed_balls[confirmed_id]
+                print("Confirmed balls:", self.confirmed_balls)
 
     def _cleanup_detections(self, current_time):
         # Remove outdated detections

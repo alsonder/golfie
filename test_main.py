@@ -190,11 +190,11 @@ async def main():
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
             
 
-            if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
-                previousOrderOfPoints = len(orderOfPoints)
-                unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
-                if unfilteredPath is not None:
-                    path = calculate_turn_points(unfilteredPath, 5)
+            #if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
+            #    previousOrderOfPoints = len(orderOfPoints)
+            #    unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+            #    if unfilteredPath is not None:
+            #        path = calculate_turn_points(unfilteredPath, 5)
             #print("path created", path[:4], orderOfPoints)
         
 
@@ -204,13 +204,13 @@ async def main():
                     cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
 
 
-        if(unfilteredPath is not None):
-            for coordinate in unfilteredPath:
-                cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
+        #if(unfilteredPath is not None):
+        #    for coordinate in unfilteredPath:
+        #        cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
 
-        if(path is not None):
-            for coordinate in path: 
-                cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
+        #if(path is not None):
+        #    for coordinate in path: 
+        #        cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
 
 
         #if front_point is not None and confirmed_balls:

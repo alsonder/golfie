@@ -24,7 +24,7 @@ def detect_balls(frame, mtx, dist):
     # max_radius = 7
 
     # Detect circles
-    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 1,
+    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, 1, 10,
                                param1=param1, param2=param2,
                                minRadius=min_radius, maxRadius=max_radius)
 
