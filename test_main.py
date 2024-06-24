@@ -45,7 +45,7 @@ async def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(4)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
@@ -171,8 +171,8 @@ async def main():
         ball_confirmation.update_detections(detected_balls, current_time)
         confirmed_balls = ball_confirmation.get_confirmed_balls_positions()
         live_data.update_balls_data(confirmed_balls)
-        #print("-----------------------------------")
-        #print("Confirmed balls: ", confirmed_balls)
+        print("-----------------------------------")
+        print("Confirmed balls: ", confirmed_balls)
         #print("Number of confirmed balls: ", len(confirmed_balls))
 
 
@@ -185,17 +185,15 @@ async def main():
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
 
-#        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
-        if confirmed_balls is not None and len(confirmed_balls) > 0 and front_point is not None:
+        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
-            
+            previousOrderOfPoints = len(orderOfPoints)
 
-            if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
-                previousOrderOfPoints = len(orderOfPoints)
+            if(path is None and begin):
                 unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
                 if unfilteredPath is not None:
                     path = calculate_turn_points(unfilteredPath, 5)
-                print("path created", path[:4], orderOfPoints)
+                print("path created")
         
 
         for i in range(len(grid)):
@@ -220,15 +218,15 @@ async def main():
             if len(orderOfPoints) >= 5:
                 begin = True
 
-        if(closest_ball is not None):
-            cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 20, (0, 0, 255), 4)
+        #if(closest_ball is not None):
+        #    cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 20, (0, 0, 255), 4)
 
 
         if path is not None and not taskexists and front_point is not None:
             print("Starting navigation.")
             taskexists = True
-            print(f"boutta look for {path[0]} and the order is: {orderOfPoints}")
-            nav_success, point =  await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
+            #print(f"boutta look for {path[0]} and the order is: {orderOfPoints}")
+            nav_success, point = await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
             point = (point[1],point[0])
             
             startup = False
@@ -237,19 +235,16 @@ async def main():
             #if are_points_close(front_point, orderOfPoints):
             #    nav_success = True
 
-            print(point)
             if nav_success:
-                if are_points_close(front_point, orderOfPoints[0]):
-                    #print("raargh we made it")
-                    #orderOfPoints.remove(point)
-                    if(point in confirmed_balls):
-                        #ball_confirmation.remove_confirmed_ball_by_coordinates(point)
-                        print("removed ball")
-                    closest_ball = orderOfPoints[0]
-                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
-                elif path is not None:
-                    #print("o hell naw jigsaw you tweakin")
-                    path.pop(0)
+                print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                if path is not None:
+                    print("path is not none")
+                    if len(path) > 1:
+                        print("path > 1", path)
+                        path.pop(0)
+                    else: 
+                        print("path = none")
+                        path = None
 
         cv2.imshow('Live Stream', frame_undistorted)
 
