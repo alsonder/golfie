@@ -28,7 +28,7 @@ wall_corner_locations, line_pixels = get_line_pixels_and_corners(image)
 goal_location = decide_goal_loc(aruco_location,wall_corner_locations)
 
 
-ROW, COL = 480,640
+ROW, COL = 768,1024
 grid, weightedGrid = gridCreation(ROW,COL, wall_corner_locations+find_cross+egg_loc)
 
 goal = (250,75)

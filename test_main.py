@@ -20,7 +20,7 @@ from global_values.find_aruco import detect_aruco
 from global_values.find_cross import find_and_draw_red_cross
 from global_values.find_egg import detect_egg
 from global_values.find_walls import get_line_pixels_and_corners
-from global_values.create_path import nearest_neighbor, a_star_search, nearest_neighbor_simplified
+from global_values.create_path import nearest_neighbor, a_star_search, nearest_neighbor_simplified, calculate_turn_points
 from global_values.create_grid import gridCreation
 from global_values.display_grid import visualize_grid
 from global_values.create_path import nearest_neighbor, a_star_search
@@ -182,9 +182,8 @@ async def main():
 #        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
         if confirmed_balls is not None and len(confirmed_balls) > 0 and front_point is not None:
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
-            
-            previousOrderOfPoints = len(confirmed_balls)
-            #path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+            if begin and path == None or begin and len(path) == 0:
+                path = calculate_turn_points(a_star_search(grid, front_point, orderOfPoints[0], weightedGrid),3)
             #print("path created", path[:4], orderOfPoints)
         
 
@@ -205,9 +204,11 @@ async def main():
         if orderOfPoints is not None:
             if len(orderOfPoints) >= 3:
                 begin = True
+            elif len(orderOfPoints) == 0:
+                begin = False
 
-        if front_point is not None and orderOfPoints is not None and begin:
-            closest_ball = orderOfPoints[0]
+        if front_point is not None and orderOfPoints is not None and begin and len(path) > 0:
+            closest_ball = path[0]
 
         if closest_ball is not None and not taskexists:
             print("Starting navigation.")
@@ -218,16 +219,19 @@ async def main():
             taskexists = False
 
             if nav_success:
-                print("RAAAAAAAARGH WE GOT THERE")
-                point = (point[1],point[0])
-                if orderOfPoints:
-                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
-                    if(point in orderOfPoints):
-                        orderOfPoints.remove(point)
-                    if(point in confirmed_balls):
-                        ball_confirmation.remove_confirmed_ball_by_coordinates(point)
-                    closest_ball = orderOfPoints[0]
-                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                if closest_ball in orderOfPoints:
+                    print("RAAAAAAAARGH WE GOT THERE")
+                    point = (point[1],point[0])
+                    if orderOfPoints:
+                        print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                        if(point in orderOfPoints):
+                            orderOfPoints.remove(point)
+                        if(point in confirmed_balls):
+                            ball_confirmation.remove_confirmed_ball_by_coordinates(point)
+                        closest_ball = orderOfPoints[0]
+                        print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                elif len(path) >= 1:
+                    path.pop(0)  
 
         #cv2.imshow('Live Stream', frame_undistorted)
 
