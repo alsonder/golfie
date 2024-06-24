@@ -19,7 +19,7 @@ def detect_egg(frame):
     gaussian_blur = 1
     param1 = 50
     param2 = 13
-    min_radius = 9
+    min_radius = 10
     max_radius = 12
 
     # apply mask which circle detection operates

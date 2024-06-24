@@ -45,7 +45,7 @@ async def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(1)
+    starter_cap = cv2.VideoCapture(4)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
@@ -190,12 +190,12 @@ async def main():
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
             
 
-            #if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
-            #    previousOrderOfPoints = len(orderOfPoints)
-            #    unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
-            #    if unfilteredPath is not None:
-            #        path = calculate_turn_points(unfilteredPath, 5)
-            #print("path created", path[:4], orderOfPoints)
+            if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
+                previousOrderOfPoints = len(orderOfPoints)
+                unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+                if unfilteredPath is not None:
+                    path = calculate_turn_points(unfilteredPath, 5)
+                print("path created", path[:4], orderOfPoints)
         
 
         for i in range(len(grid)):
@@ -204,13 +204,13 @@ async def main():
                     cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
 
 
-        #if(unfilteredPath is not None):
-        #    for coordinate in unfilteredPath:
-        #        cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
+        if(unfilteredPath is not None):
+            for coordinate in unfilteredPath:
+                cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
 
-        #if(path is not None):
-        #    for coordinate in path: 
-        #        cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
+        if(path is not None):
+            for coordinate in path: 
+                cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
 
 
         #if front_point is not None and confirmed_balls:
@@ -224,30 +224,31 @@ async def main():
             cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 20, (0, 0, 255), 4)
 
 
-        if path is not None and not taskexists:
+        if path is not None and not taskexists and front_point is not None:
             print("Starting navigation.")
             taskexists = True
             print(f"boutta look for {path[0]} and the order is: {orderOfPoints}")
-            nav_success, point = await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
+            nav_success, point =  await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
             point = (point[1],point[0])
             
             startup = False
             taskexists = False
 
-            if are_points_close(front_point, orderOfPoints):
-                nav_success = True
+            #if are_points_close(front_point, orderOfPoints):
+            #    nav_success = True
 
             print(point)
             if nav_success:
                 if are_points_close(front_point, orderOfPoints[0]):
-                    print("raargh we made it")
-                    orderOfPoints.remove(point)
+                    #print("raargh we made it")
+                    #orderOfPoints.remove(point)
                     if(point in confirmed_balls):
-                        ball_confirmation.remove_confirmed_ball_by_coordinates(point)
+                        #ball_confirmation.remove_confirmed_ball_by_coordinates(point)
+                        print("removed ball")
                     closest_ball = orderOfPoints[0]
                     print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
                 elif path is not None:
-                    print("o hell naw jigsaw you tweakin")
+                    #print("o hell naw jigsaw you tweakin")
                     path.pop(0)
 
         cv2.imshow('Live Stream', frame_undistorted)

@@ -189,8 +189,8 @@ def calculate_stopping_zone(corners, scaling_factor, front_offset_cm=4, rear_off
 
 async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup):
     ANGLE_THRESHOLD = 0.25
-    MOVEMENT_DELAY = 0.075  # Delay in seconds to throttle command sending
-    RUN_DURATION = .075  # Run for 1 second
+    MOVEMENT_DELAY = 0.1  # Delay in seconds to throttle command sending
+    RUN_DURATION = .75  # Run for 1 second
     POSITION_THRESHOLD = 13  # Distance in pixels to consider the ball as reached
 
     motor_control = MotorControl(ble_client)
