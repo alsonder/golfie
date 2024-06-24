@@ -99,7 +99,7 @@ async def main():
     print("egg_loc = ", egg_loc[:4]) #4 first values of egg
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
-    #visualize_grid(grid, aruco, [aruco,goal], [(1,0),(0,1)])
+    visualize_grid(grid, aruco, [aruco,goal], [(1,0),(0,1)])
 
     transposed_matrix = []
     for col in range(len(grid[0])):
@@ -207,7 +207,7 @@ async def main():
             elif len(orderOfPoints) == 0:
                 begin = False
 
-        if front_point is not None and orderOfPoints is not None and begin and len(path) > 0:
+        if front_point is not None and orderOfPoints is not None and begin and path is not None and len(path) > 0:
             closest_ball = path[0]
 
         if closest_ball is not None and not taskexists:
