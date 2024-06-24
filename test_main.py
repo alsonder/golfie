@@ -229,10 +229,10 @@ async def main():
                     closest_ball = orderOfPoints[0]
                     print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
 
-        cv2.imshow('Live Stream', frame_undistorted)
+        #cv2.imshow('Live Stream', frame_undistorted)
 
-        if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        #if cv2.getWindowProperty('Live Stream', 0) < 0 or cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
     
         await asyncio.sleep(0.01)  # Add a small sleep to ensure cooperative multitasking
 
