@@ -1,4 +1,6 @@
 import heapq
+import math
+import numpy as np
 
 # Define the Cell class
 class Cell:
@@ -22,7 +24,7 @@ def is_destination(row, col, dest):
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
 def calculate_h_value(row, col, dest, distance_to_wall):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + (50 / (0.01 + distance_to_wall))
+    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + 75 * math.exp(-distance_to_wall / 30)
 
 from collections import deque
 
@@ -204,6 +206,8 @@ def nearest_neighbor(grid, points, distance_to_wall=0):
 
 def nearest_neighbor_simplified(points):
     def calculate_distance(point1, point2):
+        point1 = np.array(point1, dtype=np.int64)
+        point2 = np.array(point2, dtype=np.int64)
         return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
     start = points[0]  # Start from the first point
@@ -270,3 +274,24 @@ def calculate_turn_points(path, threshold=1):
         last_turn_point = point
 
     return filtered_turn_points
+
+
+def are_points_close(point1, point2, threshold=15):
+    """
+    Check if two points are within a certain distance (threshold) from each other.
+
+    Args:
+    point1 (tuple): The first point as (x, y).
+    point2 (tuple): The second point as (x, y).
+    threshold (int): The distance threshold.
+
+    Returns:
+    bool: True if the points are within the threshold distance, False otherwise.
+    """
+    # Calculate the Euclidean distance between the two points
+    distance = math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+    
+    # Check if the distance is within the threshold
+    return distance <= threshold
+
+    

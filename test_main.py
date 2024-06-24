@@ -20,7 +20,7 @@ from global_values.find_aruco import detect_aruco
 from global_values.find_cross import find_and_draw_red_cross
 from global_values.find_egg import detect_egg
 from global_values.find_walls import get_line_pixels_and_corners
-from global_values.create_path import nearest_neighbor, a_star_search, nearest_neighbor_simplified
+from global_values.create_path import nearest_neighbor, a_star_search, nearest_neighbor_simplified, calculate_turn_points, are_points_close
 from global_values.create_grid import gridCreation
 from global_values.display_grid import visualize_grid
 from global_values.create_path import nearest_neighbor, a_star_search
@@ -45,7 +45,7 @@ async def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(4)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
@@ -102,12 +102,17 @@ async def main():
     #visualize_grid(grid, aruco, [aruco,goal], [(1,0),(0,1)])
 
     transposed_matrix = []
+    transposed_matrix_weighted = []
     for col in range(len(grid[0])):
         transposed_row = []
+        transposed_row_weighted = []
         for row in range(len(grid)):
             transposed_row.append(grid[row][col])
+            transposed_row_weighted.append(weightedGrid[row][col])
         transposed_matrix.append(transposed_row)
+        transposed_matrix_weighted.append(transposed_row_weighted)
     grid = transposed_matrix
+    weightedGrid = transposed_matrix_weighted
     print(len(grid), len(grid[0]))
 
     ########################################
@@ -134,6 +139,7 @@ async def main():
 
     is_navigating = False
     previousOrderOfPoints = 0
+    unfilteredPath = None
     orderOfPoints = None
     path = None
     begin = False
@@ -183,8 +189,12 @@ async def main():
         if confirmed_balls is not None and len(confirmed_balls) > 0 and front_point is not None:
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
             
-            previousOrderOfPoints = len(confirmed_balls)
-            #path = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+
+            if(path is None and begin or previousOrderOfPoints != len(orderOfPoints) and begin):
+                previousOrderOfPoints = len(orderOfPoints)
+                unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+                if unfilteredPath is not None:
+                    path = calculate_turn_points(unfilteredPath, 5)
             #print("path created", path[:4], orderOfPoints)
         
 
@@ -193,6 +203,10 @@ async def main():
                 if grid[i][j] == 0:
                     cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
 
+
+        if(unfilteredPath is not None):
+            for coordinate in unfilteredPath:
+                cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
 
         if(path is not None):
             for coordinate in path: 
@@ -203,31 +217,36 @@ async def main():
         #    frame_undistorted, closest_ball = find_closest_ball(front_point, confirmed_balls, frame_undistorted, total_balls)
 
         if orderOfPoints is not None:
-            if len(orderOfPoints) >= 3:
+            if len(orderOfPoints) >= 5:
                 begin = True
 
-        if front_point is not None and orderOfPoints is not None and begin:
-            closest_ball = orderOfPoints[0]
+        if(closest_ball is not None):
+            cv2.circle(frame_undistorted, tuple(confirmed_ball_pos), 20, (0, 0, 255), 4)
 
-        if closest_ball is not None and not taskexists:
+
+        if path is not None and not taskexists:
             print("Starting navigation.")
             taskexists = True
-            print(f"boutta look for {closest_ball} and the order is: {orderOfPoints}")
-            nav_success, point = await simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup)
+            print(f"boutta look for {path[0]} and the order is: {orderOfPoints}")
+            nav_success, point = await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
+            point = (point[1],point[0])
+            
             startup = False
             taskexists = False
 
+        
+            print(point)
             if nav_success:
-                print("RAAAAAAAARGH WE GOT THERE")
-                point = (point[1],point[0])
-                if orderOfPoints:
-                    print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
-                    if(point in orderOfPoints):
-                        orderOfPoints.remove(point)
+                if are_points_close(front_point, orderOfPoints[0]):
+                    print("raargh we made it")
+                    orderOfPoints.remove(point)
                     if(point in confirmed_balls):
                         ball_confirmation.remove_confirmed_ball_by_coordinates(point)
                     closest_ball = orderOfPoints[0]
                     print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
+                elif path is not None:
+                    print("o hell naw jigsaw you tweakin")
+                    path.pop(0)
 
         cv2.imshow('Live Stream', frame_undistorted)
 
