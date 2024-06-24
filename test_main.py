@@ -234,7 +234,9 @@ async def main():
             startup = False
             taskexists = False
 
-        
+            if are_points_close(front_point, orderOfPoints):
+                nav_success = True
+
             print(point)
             if nav_success:
                 if are_points_close(front_point, orderOfPoints[0]):
