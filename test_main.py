@@ -45,7 +45,7 @@ async def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(1)
+    starter_cap = cv2.VideoCapture(4)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
