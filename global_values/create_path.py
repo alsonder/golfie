@@ -24,7 +24,14 @@ def is_destination(row, col, dest):
 
 # Calculate the heuristic value of a cell (Euclidean distance to destination)
 def calculate_h_value(row, col, dest, distance_to_wall):
-    return ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5 + 80 * math.exp(-distance_to_wall / 75)
+    distance_component = 0.2 * ((row - dest[0]) ** 2 + (col - dest[1]) ** 2) ** 0.5
+    
+    # Increase the weight of being near walls by either increasing the coefficient
+    # or reducing the denominator in the exponential's divisor, making the penalty decay slower.
+    if(distance_to_wall < 25):
+        distance_to_wall = 0
+    wall_component = 250 * math.exp(-distance_to_wall / 50)
+    return distance_component + wall_component
 
 from collections import deque
 
