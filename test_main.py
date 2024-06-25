@@ -193,7 +193,7 @@ async def main():
                 unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
                 if unfilteredPath is not None:
                     path = calculate_turn_points(unfilteredPath, 15)
-                    path += orderOfPoints[0]
+                    path.append(orderOfPoints[0])
                 print("path created")
         
 
@@ -204,12 +204,12 @@ async def main():
 
 
         if(unfilteredPath is not None):
-            for coordinate in unfilteredPath:
+            for coordinate in unfilteredPath[:-1]:
                 cv2.circle(frame_undistorted, coordinate, 1, (255,0,0), 2)
 
-        if(path is not None):
-            for coordinate in path: 
-                cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
+        #if(path is not None):
+        #    for coordinate in path[:-1]: 
+        #        cv2.circle(frame_undistorted, coordinate, 1, (255, 255, 255), 2)    
 
 
         #if front_point is not None and confirmed_balls:
