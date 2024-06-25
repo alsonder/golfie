@@ -45,14 +45,14 @@ async def main():
     ### --- START OF INITIAL TESTING --- ###
     ########################################
     
-    starter_cap = cv2.VideoCapture(4)
+    starter_cap = cv2.VideoCapture(1)
     if not starter_cap.isOpened():
         print("Cannot open camera")
         return None
     
     # Set the desired resolution
     desired_width = 1024
-    desired_height = 768
+    desired_height = 576
     starter_cap.set(cv2.CAP_PROP_FRAME_WIDTH, desired_width)
     starter_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, desired_height)
 
@@ -77,7 +77,7 @@ async def main():
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW+3, COL+3, wall_corner_locations+find_cross+egg_loc); success+=1
+        try: grid, weightedGrid = gridCreation(ROW, COL, wall_corner_locations + find_cross + egg_loc); success+=1
         except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
         try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
@@ -100,7 +100,6 @@ async def main():
     print("line_pixels = ", line_pixels[:4]) #4 first values of wall
     print("goal_loc = ", goal_location)
     #visualize_grid(grid, aruco, [aruco,goal], [(1,0),(0,1)])
-
     transposed_matrix = []
     transposed_matrix_weighted = []
     for col in range(len(grid[0])):
@@ -199,7 +198,7 @@ async def main():
                     path.append(orderOfPoints[0])
                 print("path created")
         
-        if begin and orderOfPoints is not None and len(orderOfPoints) == 0:
+        if begin and orderOfPoints is not None and len(orderOfPoints) == 0 or finish and path is None:
             finish = True
             orderOfPoints[0] = goal_location[0]
             unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
@@ -213,6 +212,10 @@ async def main():
                 if grid[i][j] == 0:
                     cv2.circle(frame_undistorted, [i,j], 1, (0, 255, 255), 2)    
 
+        #for i in range(len(weightedGrid)):
+        #    for j in range(len(weightedGrid[0])):
+        #        if weightedGrid[i][j] < 255:
+        #            cv2.circle(frame_undistorted, [i,j], 1, (0, weightedGrid[i][j], weightedGrid[i][j]), 2)
 
         if(unfilteredPath is not None):
             for coordinate in unfilteredPath[:-1]:
@@ -258,6 +261,7 @@ async def main():
                     else: 
                         print("path = none")
                         path = None
+                        finish = True
 
         cv2.imshow('Live Stream', frame_undistorted)
 
