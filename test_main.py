@@ -145,6 +145,9 @@ async def main():
     begin = False
     taskexists = False
     startup = True
+
+    finish = False
+
     #calibrate_and_detect_balls(stream,mtx, dist)
     while True:
     
@@ -185,7 +188,7 @@ async def main():
             cv2.putText(frame_undistorted, f"{confirmed_ball_pos}", tuple(confirmed_ball_pos), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
 
-        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None:
+        if confirmed_balls is not None and len(confirmed_balls) > 0 and len(confirmed_balls) != previousOrderOfPoints and front_point is not None and not finish:
             orderOfPoints = nearest_neighbor_simplified([front_point] + confirmed_balls)
             previousOrderOfPoints = len(orderOfPoints)
 
@@ -196,6 +199,14 @@ async def main():
                     path.append(orderOfPoints[0])
                 print("path created")
         
+        if begin and orderOfPoints is not None and len(orderOfPoints) == 0:
+            finish = True
+            orderOfPoints[0] = goal_location[0]
+            unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
+            if unfilteredPath is not None:
+                path = calculate_turn_points(unfilteredPath, 15)
+                path.append(orderOfPoints[0])
+                print("path created")
 
         for i in range(len(grid)):
             for j in range(len(grid[0])):
@@ -227,7 +238,7 @@ async def main():
             print("Starting navigation.")
             taskexists = True
             #print(f"boutta look for {path[0]} and the order is: {orderOfPoints}")
-            nav_success, point = await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup)
+            nav_success, point = await simple_navigate_to_ball(ble_client, path[0], front_point, rear_point, startup, finish)
             point = (point[1],point[0])
             
             startup = False

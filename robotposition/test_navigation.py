@@ -187,7 +187,7 @@ def calculate_stopping_zone(corners, scaling_factor, front_offset_cm=4, rear_off
     return stopping_zone
 
 
-async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup):
+async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup, finish):
     ANGLE_THRESHOLD = 0.25
     MOVEMENT_DELAY = 0.075  # Delay in seconds to throttle command sending
     RUN_DURATION = .15  # Run for 1 second
@@ -234,7 +234,11 @@ async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_po
 
         if is_close_to_target(front_point, closest_ball, POSITION_THRESHOLD):
             asyncio.run_coroutine_threadsafe(motor_control.stop_movement(), ble_client.loop).result()
-            asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
+            if(finish):
+                asyncio.run_coroutine_threadsafe(motor_control.suction_on(), ble_client.loop).result()
+            else:
+                asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
+
             
             asyncio.sleep(5)
             return True, closest_ball  # Return True if the ball is reached
