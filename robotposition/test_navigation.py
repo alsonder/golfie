@@ -189,8 +189,8 @@ def calculate_stopping_zone(corners, scaling_factor, front_offset_cm=4, rear_off
 
 async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup):
     ANGLE_THRESHOLD = 0.25
-    MOVEMENT_DELAY = 0.25  # Delay in seconds to throttle command sending
-    RUN_DURATION = 0.26  # Run for 1 second
+    MOVEMENT_DELAY = 0.075  # Delay in seconds to throttle command sending
+    RUN_DURATION = .15  # Run for 1 second
     POSITION_THRESHOLD = 15  # Distance in pixels to consider the ball as reached
 
     motor_control = MotorControl(ble_client)
@@ -207,8 +207,8 @@ async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_po
     if startup:
         print("Sending initial commands.")
         asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
-        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_a(20), ble_client.loop).result()
-        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_b(20), ble_client.loop).result()
+        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_a(90), ble_client.loop).result()
+        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_b(90), ble_client.loop).result()
 
     def is_close_to_target(current, target, threshold):
         return np.linalg.norm(np.array(current) - np.array(target)) < threshold
@@ -236,7 +236,7 @@ async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_po
             asyncio.run_coroutine_threadsafe(motor_control.stop_movement(), ble_client.loop).result()
             asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
             
-            asyncio.sleep(2)
+            asyncio.sleep(5)
             return True, closest_ball  # Return True if the ball is reached
 
         asyncio.sleep(MOVEMENT_DELAY)

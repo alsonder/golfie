@@ -77,7 +77,7 @@ async def main():
 
         try: goal_location = decide_goal_loc(aruco_location,wall_corner_locations); success+=1
         except: print("Goal Detection          | Failed")
-        try: grid, weightedGrid = gridCreation(ROW, COL, wall_corner_locations+find_cross+egg_loc); success+=1
+        try: grid, weightedGrid = gridCreation(ROW+3, COL+3, wall_corner_locations+find_cross+egg_loc); success+=1
         except: print("Grid Creation           | Failed"); print("Weights Added to Grid   | Failed")
 
         try: goal = (round(goal_location[0][1]/2),round(goal_location[0][0]/2)); success+=1
@@ -192,7 +192,8 @@ async def main():
             if(path is None and begin):
                 unfilteredPath = a_star_search(grid, front_point, orderOfPoints[0], weightedGrid)
                 if unfilteredPath is not None:
-                    path = calculate_turn_points(unfilteredPath, 5)
+                    path = calculate_turn_points(unfilteredPath, 15)
+                    path += orderOfPoints[0]
                 print("path created")
         
 
@@ -236,6 +237,7 @@ async def main():
             #    nav_success = True
 
             if nav_success:
+                nav_success = False
                 print(f"lenhth of order {len(orderOfPoints)}, length of conf {len(confirmed_balls)}")
                 if path is not None:
                     print("path is not none")
