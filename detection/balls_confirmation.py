@@ -1,47 +1,80 @@
 import time
+import numpy as np
 
 class BallConfirmation:
-    # pass in variables for confirmation, 20% of the frames must contain tthe circle for it to become a firm ball, to be a removed ball 80% of 
-    #frames must be without the ball, if its been still for 5 seconds, it becomes a firm ball, usage in a camera which processes 30 fps
-    def __init__(self, confirmation_threshold=0.2, removal_threshold=0.8, time_window=5, frame_rate=30):
-        self.confirmation_threshold = confirmation_threshold
-        self.removal_threshold = removal_threshold
-        self.time_window = time_window
-        self.frame_rate = frame_rate
-        self.detections = {}
-        self.confirmed_balls = {}
-    
-    # Updates the class with the latest detections, and a time, each detected ball is identified by its position, which is tracked and evaluated
+    def __init__(self, confirmation_threshold=0.18, removal_threshold=0.1, time_window=5, frame_rate=5, ball_count=8):
+        self.confirmation_threshold = confirmation_threshold  # Minimum ratio of frames in which a ball must be detected to be confirmed
+        self.removal_threshold = removal_threshold  # Minimum ratio of frames without the ball to consider it removed
+        self.ball_count = ball_count
+        self.time_window = time_window  # Time window in seconds for considering detection data
+        self.frame_rate = frame_rate  # Frame rate of the camera
+        self.detections = {}  # Temporary storage for new detections
+        self.confirmed_balls = {}  # Confirmed balls with last seen time
 
     def update_detections(self, detected_balls, current_time):
+        proximity_threshold = 30  # Distance threshold to consider detections as the same ball
+
+        # Process new detections
         for position in detected_balls:
-            ball_id = tuple(position)  
-            if ball_id not in self.detections:
-                self.detections[ball_id] = []
-            self.detections[ball_id].append(current_time)
+            ball_id = tuple(position)
+            found = False
+
+            # Check against existing confirmed balls
+            for confirmed_id in list(self.confirmed_balls.keys()):
+                if np.linalg.norm(np.array(ball_id) - np.array(confirmed_id)) < proximity_threshold:
+                    self.confirmed_balls[confirmed_id] = current_time
+                    found = True
+                    break
+
+            # If not found, it might be a new ball
+            if not found:
+                if ball_id not in self.detections:
+                    self.detections[ball_id] = []
+                self.detections[ball_id].append(current_time)
 
         self._cleanup_detections(current_time)
         self._confirm_or_remove_balls(current_time)
 
-    # removes old balls (!).. which is detections older than the time_window formm the detections dict so we dont fill the array with outdated positions
+    def _confirm_or_remove_balls(self, current_time):
+        for ball_id, times in list(self.detections.items()):
+            detection_ratio = len(times) / (self.time_window * self.frame_rate)
+
+            # Confirm based on detection ratio
+            if detection_ratio >= self.confirmation_threshold:
+                self.confirmed_balls[ball_id] = current_time
+
+        removal_delay = self.time_window  # Time window to consider a ball for removal
+        for confirmed_id in list(self.confirmed_balls.keys()):
+            time_since_last_seen = current_time - self.confirmed_balls[confirmed_id]
+            if time_since_last_seen >= removal_delay:
+                print(f"Removing ball ID: {confirmed_id} due to inactivity for {time_since_last_seen} seconds.")
+                del self.confirmed_balls[confirmed_id]
+                print("Confirmed balls:", self.confirmed_balls)
+
     def _cleanup_detections(self, current_time):
+        # Remove outdated detections
         to_remove = []
-        for ball_id, times in self.detections.items():
+        for ball_id, times in list(self.detections.items()):
             self.detections[ball_id] = [t for t in times if current_time - t <= self.time_window]
             if not self.detections[ball_id]:
                 to_remove.append(ball_id)
+
         for ball_id in to_remove:
             del self.detections[ball_id]
 
-    # This check if its a new ball, or it should remove previously firm balls
-    def _confirm_or_remove_balls(self, current_time):
-        confirmed_ids = list(self.confirmed_balls.keys())
-        for ball_id, times in self.detections.items():
-            if len(times) / (self.frame_rate * self.time_window) >= self.confirmation_threshold:
-                self.confirmed_balls[ball_id] = times[-1]  
-            elif ball_id in confirmed_ids and current_time - self.confirmed_balls[ball_id] > (1 - self.removal_threshold) * self.time_window:
-                del self.confirmed_balls[ball_id]
-
-    # Returns positions of firm balls
     def get_confirmed_balls_positions(self):
-        return [list(ball_id) for ball_id in self.confirmed_balls.keys()]
+        return [tuple(ball_id) for ball_id in self.confirmed_balls.keys()]
+
+    def remove_confirmed_ball_by_coordinates(self, coordinates, proximity_threshold=30):
+        ball_id_to_remove = None
+        for ball_id in self.confirmed_balls.keys():
+            if np.linalg.norm(np.array(coordinates) - np.array(ball_id)) < proximity_threshold:
+                ball_id_to_remove = ball_id
+                break
+
+        if ball_id_to_remove:
+            print(f"Removing ball ID: {ball_id_to_remove} based on coordinates {coordinates}.")
+            del self.confirmed_balls[ball_id_to_remove]
+            print("Confirmed balls:", self.confirmed_balls)
+        else:
+            print(f"No ball found within {proximity_threshold} pixels of coordinates {coordinates}.")

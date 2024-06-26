@@ -3,13 +3,13 @@ import cv2
 import cv2.aruco as aruco
 import numpy as np
 
-def detect_aruco(stream, mtx, dist, markerLength):
+def detect_aruco(frame, mtx, dist, markerLength):
     # Create an ArUco dictionary and parameters for detector, ballsucker uses 7x7_1000
     dictionary = aruco.getPredefinedDictionary(aruco.DICT_7X7_1000)
     parameters = aruco.DetectorParameters()
 
     # Capture frame-by-frame
-    frame = stream.get_frame()
+    # frame = stream.get_frame()
 
     # Detect the markers in the image
     corners, ids, rejectedImgPoints = aruco.detectMarkers(frame, dictionary, parameters=parameters)

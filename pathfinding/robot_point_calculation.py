@@ -48,4 +48,4 @@ def calculate_and_draw_points(frame, corners):
     cv2.circle(frame, mid_rear_int, 5, (0, 255, 0), -1)  # Green for mid rear point
     cv2.circle(frame, front_point_int, 5, (255, 0, 0), -1)  # Blue for front point
 
-    return frame, front_point_int
+    return frame, front_point_int, mid_rear_int
