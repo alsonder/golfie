@@ -52,6 +52,7 @@ def detect_balls(frame, mtx, dist):
     #print("Detected balls:", ball_list)
     return ball_list
 
+
 # Usage in your existing code, e.g., within a loop where you capture frames from the camera:
 # cap = cv2.VideoCapture(0)
 # while True:
@@ -66,3 +67,4 @@ def detect_balls(frame, mtx, dist):
 #         break
 # cap.release()
 # cv2.destroyAllWindows()
+
