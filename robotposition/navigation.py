@@ -185,3 +185,60 @@ def calculate_stopping_zone(corners, scaling_factor, front_offset_cm=4, rear_off
     }
 
     return stopping_zone
+
+
+async def simple_navigate_to_ball(ble_client, closest_ball, front_point, rear_point, startup):
+    ANGLE_THRESHOLD = 0.25
+    MOVEMENT_DELAY = 0.075  # Delay in seconds to throttle command sending
+    RUN_DURATION = .15  # Run for 1 second
+    POSITION_THRESHOLD = 15  # Distance in pixels to consider the ball as reached
+
+    motor_control = MotorControl(ble_client)
+    last_command_time = time.time()
+    start_time = time.time()
+    last_command = None
+    
+    closest_ball = (closest_ball[1], closest_ball[0])
+    front_point = (front_point[1], front_point[0])
+    rear_point = (rear_point[1], rear_point[0])
+    
+    print(f"from: {front_point} to  {closest_ball}")
+    
+    if startup:
+        print("Sending initial commands.")
+        asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
+        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_a(90), ble_client.loop).result()
+        asyncio.run_coroutine_threadsafe(motor_control.set_pwm_motor_b(90), ble_client.loop).result()
+
+    def is_close_to_target(current, target, threshold):
+        return np.linalg.norm(np.array(current) - np.array(target)) < threshold
+
+    while time.time() - start_time < RUN_DURATION:
+        angle_to_target = calculate_angle_to_target_radians(front_point, rear_point, closest_ball)
+        current_time = time.time()
+
+        if abs(angle_to_target) > ANGLE_THRESHOLD:
+            if angle_to_target > 0 and last_command != "right" and (current_time - last_command_time) > MOVEMENT_DELAY:
+                asyncio.run_coroutine_threadsafe(motor_control.turn_right(), ble_client.loop).result()
+                last_command = "right"
+                last_command_time = current_time
+            elif angle_to_target < 0 and last_command != "left" and (current_time - last_command_time) > MOVEMENT_DELAY:
+                asyncio.run_coroutine_threadsafe(motor_control.turn_left(), ble_client.loop).result()
+                last_command = "left"
+                last_command_time = current_time
+        else:
+            if last_command != "forward" and (current_time - last_command_time) > MOVEMENT_DELAY:
+                asyncio.run_coroutine_threadsafe(motor_control.move_forward(), ble_client.loop).result()
+                last_command = "forward"
+                last_command_time = current_time
+
+        if is_close_to_target(front_point, closest_ball, POSITION_THRESHOLD):
+            asyncio.run_coroutine_threadsafe(motor_control.stop_movement(), ble_client.loop).result()
+            asyncio.run_coroutine_threadsafe(motor_control.blow_on(), ble_client.loop).result()
+            
+            asyncio.sleep(5)
+            return True, closest_ball  # Return True if the ball is reached
+
+        asyncio.sleep(MOVEMENT_DELAY)
+
+    return False, closest_ball  # Return False if the robot did not reach the ball in the given time
